@@ -1,0 +1,53 @@
+name: scraper-run
+
+# Daily scraper run on GitHub Actions' free tier. Free because the job is
+# ~4 minutes wall time and the runner shuts down between invocations — no
+# persistent host to pay for. 03:00 SGT = 19:00 UTC.
+
+on:
+  schedule:
+    - cron: '0 19 * * *'
+  workflow_dispatch:
+
+# Prevent overlapping runs if a manual dispatch overlaps the cron tick.
+concurrency:
+  group: scraper-run
+  cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: scrapers
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PYTHONPATH: src
+      SUPABASE_URL: ${{ secrets.SCRAPER_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SCRAPER_SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: scrapers/uv.lock
+
+      - name: Set up Python
+        run: uv python install 3.13
+
+      - name: Sync deps
+        run: uv sync --frozen
+
+      - name: Verify env wired
+        run: |
+          if [ -z "${SUPABASE_URL:-}" ] || [ -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]; then
+            echo "::error::SCRAPER_SUPABASE_URL and SCRAPER_SUPABASE_SERVICE_ROLE_KEY must be set as GitHub repo secrets."
+            exit 1
+          fi
+          echo "supabase target host: $(echo "$SUPABASE_URL" | sed -E 's#https?://([^/]+).*#\1#')"
+
+      - name: Run scrapers
+        run: uv run python -m runner
