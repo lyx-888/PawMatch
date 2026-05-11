@@ -34,10 +34,13 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#d97706',
+  // `viewport-fit: cover` lets the page draw into iOS safe areas so the bottom
+  // home-indicator strip doesn't show iOS's default black background.
+  themeColor: '#fafaf9',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
+  viewportFit: 'cover',
 }
 
 export default function RootLayout({
@@ -47,7 +50,7 @@ export default function RootLayout({
 }>): React.ReactElement {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col bg-stone-50 text-stone-900">
+      <body className="flex min-h-dvh flex-col bg-stone-50 text-stone-900">
         {children}
         <ServiceWorkerRegistration />
       </body>
