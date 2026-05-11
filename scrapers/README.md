@@ -29,3 +29,15 @@ The scraper service shares a Postgres database with the [web/](../web/) app, but
 ## Env vars
 
 See [.env.example](.env.example) in this directory.
+
+## Scheduled runs (free tier)
+
+Daily scrape runs on GitHub Actions, defined in [`.github/workflows/scraper-run.yml`](../.github/workflows/scraper-run.yml):
+- Cron: `0 19 * * *` UTC → **03:00 SGT**.
+- Manual trigger: Actions → scraper-run → "Run workflow".
+
+The job needs two repo secrets (Settings → Secrets and variables → Actions):
+- `SCRAPER_SUPABASE_URL` — production Supabase URL.
+- `SCRAPER_SUPABASE_SERVICE_ROLE_KEY` — `sb_secret_…` for the same project. Service role: bypasses RLS, never expose to the browser.
+
+GitHub Actions Free includes 2,000 minutes/month for private repos and unlimited for public. A full scrape is ~4 minutes / day = ~120 minutes / month, well inside the limit.
