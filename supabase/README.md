@@ -4,21 +4,31 @@ CLI-managed schema migrations. Shared by [web/](../web/) and [scrapers/](../scra
 
 ## Local development setup
 
-> Status: not yet wired up. First migration ships in Phase 1.
+> Status: wired up. `supabase/config.toml` is committed; first migration ships in Phase 1.
 
 Prerequisites:
-- **Docker Desktop** — https://www.docker.com/products/docker-desktop/
-- **Supabase CLI** — `scoop install supabase` *or* `npm install -g supabase` *or* download from https://github.com/supabase/cli/releases
+- **Docker Desktop** — https://www.docker.com/products/docker-desktop/ (must be running before `supabase start`)
+- **Supabase CLI** — on Windows install [Scoop](https://scoop.sh), then `scoop bucket add supabase https://github.com/supabase/scoop-bucket.git && scoop install supabase`. On macOS use `brew install supabase/tap/supabase`. Other platforms: download from https://github.com/supabase/cli/releases.
 
 Then from the repo root:
 
 ```bash
-supabase init          # one-time, links this directory to the CLI
-supabase login         # browser auth, one-time per machine
+supabase start         # spins up local Postgres + Studio via Docker (first run pulls ~15 images, 3-8 min)
+supabase login         # browser auth, one-time per machine — only needed for cloud ops below
 supabase link --project-ref pzyixlsmjqzgmtfivjad   # link to the cloud project
-supabase start         # spins up local Postgres + Studio via Docker
 supabase db push       # apply local migrations to the cloud project
+supabase stop          # tear down local containers
 ```
+
+`supabase init` already ran — `config.toml` is committed. Don't re-run it.
+
+After `supabase start`, services run on:
+- **Studio** http://127.0.0.1:54323 (Postgres GUI)
+- **API** http://127.0.0.1:54321 (REST, GraphQL, Auth, Storage)
+- **Postgres** `postgresql://postgres:postgres@127.0.0.1:54322/postgres`
+- **Mailpit** http://127.0.0.1:54324 (captures local auth emails)
+
+Run `supabase status` any time to print the current URLs and the local publishable/secret API keys (these are shared defaults — never use them outside local dev).
 
 ## Migration rules (from [CLAUDE.md](../CLAUDE.md))
 
