@@ -2,14 +2,8 @@ name: scrapers
 
 on:
   pull_request:
-    paths:
-      - 'scrapers/**'
-      - '.github/workflows/scrapers.yml'
   push:
     branches: [main]
-    paths:
-      - 'scrapers/**'
-      - '.github/workflows/scrapers.yml'
 
 defaults:
   run:
