@@ -49,5 +49,31 @@ jobs:
           fi
           echo "supabase target host: $(echo "$SUPABASE_URL" | sed -E 's#https?://([^/]+).*#\1#')"
 
+      - name: Diagnose Supabase key
+        # Prints only non-secret claims (role/iss/ref/exp) from the JWT, or the
+        # token format if it's not a JWT. Never echoes the signature.
+        run: |
+          python - <<'PY'
+          import base64, json, os, sys
+          key = os.environ.get('SUPABASE_SERVICE_ROLE_KEY', '')
+          if not key:
+              print('NO KEY SET'); sys.exit(1)
+          if key.startswith('sb_secret_') or key.startswith('sb_publishable_'):
+              print(f'FORMAT: new sb_* key (length {len(key)})')
+              print('NOTE: not a JWT; claims not decodable from this token type.')
+              sys.exit(0)
+          parts = key.split('.')
+          if len(parts) != 3:
+              print(f'FORMAT: unknown ({len(parts)} segments, not 3 -> not a JWT, not sb_*)')
+              sys.exit(0)
+          mid = parts[1] + '=' * (-len(parts[1]) % 4)
+          claims = json.loads(base64.urlsafe_b64decode(mid))
+          print('FORMAT: JWT')
+          print(f"role: {claims.get('role')}")
+          print(f"iss:  {claims.get('iss')}")
+          print(f"ref:  {claims.get('ref')}")
+          print(f"exp:  {claims.get('exp')}  (claim only -- signature not verified here)")
+          PY
+
       - name: Run scrapers
         run: uv run python -m runner
