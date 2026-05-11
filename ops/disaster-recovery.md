@@ -7,7 +7,7 @@
 - **Supabase data loss / corruption** — restoration from automated daily backup; estimated RTO/RPO.
 - **Accidental destructive migration** — recovery via point-in-time restore.
 - **Vercel project deletion or compromise** — re-link from Git, restore env vars from password manager.
-- **Lost access to third-party services** (Anthropic, Resend, Inngest) — break-glass account recovery.
+- **Lost access to third-party services** (OpenAI, Resend, Inngest) — break-glass account recovery.
 - **Domain hijack** — registrar contact, DNS rollback procedure.
 
 ## Backup inventory

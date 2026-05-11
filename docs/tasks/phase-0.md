@@ -68,13 +68,13 @@
 
 These are needed for later phases. Set up now so we're not blocked when we need them.
 
-- [ ] Sign up for Anthropic API; provision a key with billing limit set to $20/mo. Store in 1Password vault.
+- [ ] Sign up for OpenAI API; provision a key with usage limit set to $20/mo. Store in 1Password vault.
 - [ ] Sign up for Resend; verify project domain (or pawmatch.sg if claimed) for email sending. Configure SPF/DKIM/DMARC records.
 - [ ] Sign up for Inngest; create a project, generate event and signing keys.
 - [ ] Sign up for Plausible (or PostHog) for analytics.
 - [ ] Generate VAPID keys for Web Push (`npx web-push generate-vapid-keys`).
 - [ ] Add all keys to Vercel and Fly.io env, plus the shared 1Password vault.
-- **Acceptance:** every key has a verified working test (curl Anthropic API, send a test email, fire a test Inngest event, see analytics in dashboard).
+- **Acceptance:** every key has a verified working test (curl OpenAI API, send a test email, fire a test Inngest event, see analytics in dashboard).
 
 ### 0.9 Phase 0 ship gate
 

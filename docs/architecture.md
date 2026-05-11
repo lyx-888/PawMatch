@@ -91,7 +91,7 @@ All Inngest jobs must be idempotent. Each logs completion to a metrics table. De
 | HTTP client (Python) | httpx | Async, modern |
 | HTML parsing | selectolax | Faster than BeautifulSoup |
 | Browser automation | playwright (only when JS-rendered required) | Fallback only |
-| LLM | Claude Haiku via Anthropic API | Cheap, fast, structured outputs |
+| LLM | OpenAI gpt-4o-mini | Cheap, fast, structured outputs |
 | Push notifications | Web Push API + service worker | No native required |
 | Email | Resend | Modern API, generous free tier |
 | Web hosting | Vercel | Tight Next.js integration |
@@ -117,7 +117,7 @@ Local dev requires Node 20+, Python 3.11+, Docker. Setup: `cp .env.example .env.
 - All secrets in env vars: Vercel for web, Fly.io for scrapers.
 - `.env.example` lists every var with a comment, never values.
 - Never commit `.env*` (other than `.env.example`).
-- Rotate quarterly: Anthropic key, Supabase service role, Resend, Inngest signing key, VAPID keys.
+- Rotate quarterly: OpenAI key, Supabase service role, Resend, Inngest signing key, VAPID keys.
 - If a secret leaks: immediate rotation, audit access logs, document in `ops/incidents/`.
 
 ## `.env.example` template
@@ -130,8 +130,8 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=          # web service role; never expose to client
 
-# Anthropic
-ANTHROPIC_API_KEY=
+# OpenAI
+OPENAI_API_KEY=
 LLM_DAILY_CAP_USD=2
 
 # Inngest
@@ -159,4 +159,4 @@ ADMIN_IP_ALLOWLIST=                  # comma-separated CIDRs
 ADMIN_AUTH_PASSWORD_HASH=            # bcrypt of admin password
 ```
 
-Scrapers have their own `.env.example` with overlapping but distinct vars (Supabase service role, Anthropic key, scraper user agent).
+Scrapers have their own `.env.example` with overlapping but distinct vars (Supabase service role, OpenAI key, scraper user agent).

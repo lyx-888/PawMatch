@@ -22,4 +22,4 @@
 - Solo developer: yixuanleong441@gmail.com
 - Supabase status: https://status.supabase.com
 - Vercel status: https://www.vercel-status.com
-- Anthropic status: https://status.anthropic.com
+- OpenAI status: https://status.openai.com
