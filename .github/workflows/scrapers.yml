@@ -16,7 +16,7 @@ defaults:
     working-directory: scrapers
 
 jobs:
-  check:
+  scrapers:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
