@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { useCallback, useState } from 'react'
 
 import { cn } from '@/lib/cn'
@@ -13,11 +14,27 @@ type Props = {
 }
 
 export function PetDetailActions({ pet, className }: Props): React.ReactElement {
+  const router = useRouter()
   const favorites = useFavorites()
   const passes = usePasses()
   const [shared, setShared] = useState<'success' | 'copied' | null>(null)
+  const [passed, setPassed] = useState(false)
 
   const isFavorite = favorites.has(pet.id)
+  const isPassed = passed || passes.has(pet.id)
+
+  const onPass = useCallback(() => {
+    const result = passes.add(pet.id)
+    if (result !== 'already-present') track('pet_passed', { pet_id: pet.id, source: pet.source })
+    setPassed(true)
+    // Brief confirmation, then bounce back to wherever they came from. Falls
+    // back to the home swipe stack if this was a deep-link entry with no
+    // back-history (e.g. opened from a share URL).
+    window.setTimeout(() => {
+      if (typeof window !== 'undefined' && window.history.length > 1) router.back()
+      else router.push('/')
+    }, 450)
+  }, [passes, pet, router])
 
   const onShare = useCallback(async () => {
     const shareData = {
@@ -68,14 +85,11 @@ export function PetDetailActions({ pet, className }: Props): React.ReactElement 
           intent={isFavorite ? 'active' : 'idle'}
         />
         <ActionButton
-          label="Pass"
+          label={isPassed ? 'Passed' : 'Pass'}
           ariaLabel={`Pass on ${pet.name}`}
-          onClick={() => {
-            const result = passes.add(pet.id)
-            if (result !== 'already-present')
-              track('pet_passed', { pet_id: pet.id, source: pet.source })
-          }}
-          intent="idle"
+          onClick={onPass}
+          disabled={passed}
+          intent={isPassed ? 'active' : 'idle'}
         />
         <ActionButton
           label={shared === 'copied' ? 'Copied' : 'Share'}
