@@ -1,0 +1,22 @@
+{
+  "name": "pawmatch",
+  "private": true,
+  "description": "Root workspace coordinator. Manages git hooks for the monorepo. App code lives in web/ and scrapers/.",
+  "scripts": {
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "web/**/*.{ts,tsx,js,jsx,mjs,cjs}": [
+      "prettier --write",
+      "bash -c 'cd web && npx eslint --fix \"$@\"' --"
+    ],
+    "web/**/*.{json,md,css,yml,yaml}": [
+      "prettier --write"
+    ]
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.4",
+    "prettier": "^3.8.3"
+  }
+}

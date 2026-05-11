@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(node --version 2>&1)",
+      "PowerShell(npm --version 2>&1)",
+      "PowerShell(python --version 2>&1)",
+      "PowerShell(py --version 2>&1)",
+      "PowerShell(docker --version 2>&1)",
+      "PowerShell(npm install --prefix \"c:\\\\Users\\\\yixua\\\\ClaudeProjects\\\\PawMatch\\\\web\" --no-fund --no-audit 2>&1)"
+    ]
+  }
+}
