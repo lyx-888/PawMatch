@@ -18,7 +18,7 @@
    | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `sb_publishable_...` | The publishable key from Supabase |
    | `SUPABASE_SERVICE_ROLE_KEY` | `sb_secret_...` | The secret key. **Never** prefix with `NEXT_PUBLIC_` |
 
-   Defer the rest (`ANTHROPIC_API_KEY`, `INNGEST_*`, `RESEND_API_KEY`, `VAPID_*`, `SENTRY_DSN`) until Phase 2/3 when those services are wired up.
+   Defer the rest (`OPENAI_API_KEY`, `INNGEST_*`, `RESEND_API_KEY`, `VAPID_*`, `SENTRY_DSN`) until Phase 2/3 when those services are wired up.
 
 5. Click **Deploy**. First build takes 1–2 min.
 6. **Acceptance:** the deployed URL serves the default Next.js page over HTTPS. Take note of the production URL — point UptimeRobot at it later.

@@ -19,14 +19,14 @@
 
 ### 2.2 LLM extraction pipeline
 
-- [ ] Add Anthropic API key to scraper env.
-- [ ] `src/extraction.py` with `extract_attributes(description: str) -> ExtractionResult` using Claude Haiku, structured outputs.
+- [ ] Add OpenAI API key to scraper env.
+- [ ] `src/extraction.py` with `extract_attributes(description: str) -> ExtractionResult` using OpenAI gpt-4o-mini, structured outputs.
 - [ ] Schema: per `requirements.md` §2.1.4 — fields with confidence scores.
 - [ ] Add `extraction_cache` table; cache by `sha256(description + schema_version)`.
 - [ ] Wire into `runner.py` post-upsert.
 - [ ] Daily $2 USD spend cap at wrapper level.
 - [ ] Mark `low_confidence_fields` array on pets.
-- [ ] Unit tests with mocked Anthropic responses for known inputs.
+- [ ] Unit tests with mocked OpenAI responses for known inputs.
 - **Acceptance:** extraction runs after scrape; cache hit rate > 80% on second run; daily spend logged in `cost_log`.
 
 ### 2.3 User profile data model and API

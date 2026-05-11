@@ -137,7 +137,7 @@ cd web && npm run lint && npm run typecheck && npm run test
 
 ### LLM-adjacent code
 
-Match score reasons use templates with deterministic interpolation — fully testable. The LLM extraction wrapper is tested with mocked Anthropic responses; never hit the real API in tests. Real-API smoke tests live in a separate `npm run test:integration` that runs nightly, not on PRs.
+Match score reasons use templates with deterministic interpolation — fully testable. The LLM extraction wrapper is tested with mocked OpenAI responses; never hit the real API in tests. Real-API smoke tests live in a separate `npm run test:integration` that runs nightly, not on PRs.
 
 ### Scrapers
 

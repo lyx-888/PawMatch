@@ -14,7 +14,7 @@
 | Database | Supabase Postgres (region: ap-southeast-1) | Auth + DB + storage + RLS |
 | Auth | Supabase Auth, magic link | No password reset flows |
 | Scrapers | Python 3.11+, httpx, selectolax, playwright (only when needed) | Best HTML-parsing ecosystem |
-| LLM | Claude Haiku via Anthropic API, structured outputs | Cheap, fast, JSON schema |
+| LLM | OpenAI gpt-4o-mini, structured outputs | Cheap, fast, JSON schema |
 | Job queue | Inngest (free tier) | Avoids reinventing retry/backoff |
 | Push | Web Push API + service worker | No native required |
 | Email | Resend | Modern API, free tier |
@@ -471,7 +471,7 @@ For breaking changes that can't be split: schedule a coordinated outage window, 
 |---|---|---|---|
 | Vercel | 100GB bw/mo | 5–20GB | Pro ($20/mo) |
 | Supabase | 500MB DB, 2GB bw | < 100MB DB | Pro ($25/mo) |
-| Anthropic | Pay-as-you-go | $5–10/mo | Daily cap enforced |
+| OpenAI | Pay-as-you-go | $5–10/mo | Daily cap enforced |
 | Fly.io | $5/mo for shared CPU | $5/mo | n/a |
 | Resend | 3K emails/mo | < 1K | Paid |
 | Inngest | 50K events/mo | < 10K | Paid |

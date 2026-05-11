@@ -25,7 +25,7 @@
 
 ## Architecture in one paragraph
 
-Two services share one Postgres database (Supabase, ap-southeast-1). `web/` is Next.js 14 App Router + TypeScript strict + Tailwind, serving the PWA, admin UI, and all client-facing API routes. `scrapers/` is a standalone Python service that runs on a schedule, scrapes shelter sites, performs LLM extraction via Claude Haiku, and writes to Postgres. The web app and scrapers communicate **only through the database** — never directly. Background jobs run on Inngest (match score recompute, notifications, daily picks). Hosted on Vercel + Fly.io. See `docs/architecture.md` for full rationale.
+Two services share one Postgres database (Supabase, ap-southeast-1). `web/` is Next.js 14 App Router + TypeScript strict + Tailwind, serving the PWA, admin UI, and all client-facing API routes. `scrapers/` is a standalone Python service that runs on a schedule, scrapes shelter sites, performs LLM extraction via OpenAI gpt-4o-mini, and writes to Postgres. The web app and scrapers communicate **only through the database** — never directly. Background jobs run on Inngest (match score recompute, notifications, daily picks). Hosted on Vercel + Fly.io. See `docs/architecture.md` for full rationale.
 
 ---
 
@@ -51,9 +51,9 @@ Breaking changes that can't be split need coordinated downtime — see `ops/migr
 
 Use without asking. Anything else: propose first.
 
-**Web:** `next`, `react`, `typescript`, `tailwindcss`, `clsx`, `tailwind-merge`, `framer-motion`, `zod`, `@supabase/supabase-js`, `@supabase/ssr`, `@anthropic-ai/sdk`, `inngest`, `resend`, `web-push`, `@sentry/nextjs`, `posthog-js` or Plausible client. Dev: `vitest`, `@testing-library/react`, `@playwright/test`, `eslint`, `prettier`, `husky`, `lint-staged`.
+**Web:** `next`, `react`, `typescript`, `tailwindcss`, `clsx`, `tailwind-merge`, `framer-motion`, `zod`, `@supabase/supabase-js`, `@supabase/ssr`, `openai`, `inngest`, `resend`, `web-push`, `@sentry/nextjs`, `posthog-js` or Plausible client. Dev: `vitest`, `@testing-library/react`, `@playwright/test`, `eslint`, `prettier`, `husky`, `lint-staged`.
 
-**Scrapers:** `httpx`, `selectolax`, `playwright`, `pydantic`, `supabase`, `anthropic`, `imagehash`. Dev: `pytest`, `ruff`, `mypy`, `pre-commit`.
+**Scrapers:** `httpx`, `selectolax`, `playwright`, `pydantic`, `supabase`, `openai`, `imagehash`. Dev: `pytest`, `ruff`, `mypy`, `pre-commit`.
 
 ---
 
