@@ -7,11 +7,11 @@
   },
   "lint-staged": {
     "web/**/*.{ts,tsx,js,jsx,mjs,cjs}": [
-      "prettier --write",
+      "bash -c 'cd web && npx prettier --write \"$@\"' --",
       "bash -c 'cd web && npx eslint --fix \"$@\"' --"
     ],
     "web/**/*.{json,md,css,yml,yaml}": [
-      "prettier --write"
+      "bash -c 'cd web && npx prettier --write \"$@\"' --"
     ]
   },
   "devDependencies": {
