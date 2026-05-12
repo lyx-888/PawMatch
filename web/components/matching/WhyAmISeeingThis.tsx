@@ -4,6 +4,7 @@ import { useState } from 'react'
 
 import { ReasonList } from './ReasonList'
 import { cn } from '@/lib/cn'
+import { t } from '@/lib/i18n'
 import type { MatchScore } from '@/lib/matching/types'
 
 type Props = {
@@ -24,11 +25,11 @@ export function WhyAmISeeingThis({ match, className }: Props): React.ReactElemen
         aria-expanded={open}
         className="text-amber-700 underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700"
       >
-        {open ? 'Hide match breakdown' : 'Why am I seeing this?'}
+        {open ? t('match.why_hide') : t('match.why_show')}
       </button>
       {open && (
         <div className="mt-2 rounded-2xl border border-stone-200 bg-stone-50 p-3">
-          <p className="text-xs text-stone-500">Match score: {match.score} / 100</p>
+          <p className="text-xs text-stone-500">{t('match.score', { score: match.score })}</p>
           <ReasonList reasons={match.reasons} limit={Infinity} className="mt-2 text-sm" />
         </div>
       )}

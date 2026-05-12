@@ -11,6 +11,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { SwipeCard } from './SwipeCard'
 import { cn } from '@/lib/cn'
+import { t } from '@/lib/i18n'
 import { addFavorite, addPass, useFavorites } from '@/lib/local-state'
 import type { Pet } from '@/types/pet'
 
@@ -86,10 +87,8 @@ export function SwipeStack({ pets, onDecision, onEmpty }: Props): React.ReactEle
   if (!current) {
     return (
       <div className="flex h-full w-full flex-col items-center justify-center gap-3 rounded-3xl border-2 border-dashed border-stone-200 bg-white p-8 text-center">
-        <p className="text-lg font-semibold text-stone-900">You&apos;ve seen everyone here.</p>
-        <p className="text-sm text-stone-600">
-          Widen your filters or check back tomorrow — new pets get listed daily.
-        </p>
+        <p className="text-lg font-semibold text-stone-900">{t('swipe.empty_title')}</p>
+        <p className="text-sm text-stone-600">{t('swipe.empty_body')}</p>
       </div>
     )
   }
@@ -111,25 +110,21 @@ export function SwipeStack({ pets, onDecision, onEmpty }: Props): React.ReactEle
       <div
         className="flex items-center justify-center gap-6"
         role="group"
-        aria-label="Swipe actions"
+        aria-label={t('swipe.actions_label')}
       >
         <ActionButton
           intent="pass"
           onClick={() => apply('pass')}
-          ariaLabel={`Pass on ${current.name}`}
+          ariaLabel={t('swipe.pass_aria', { name: current.name })}
         />
         <ActionButton
           intent="favorite"
           onClick={() => apply('favorite')}
           disabled={capReached}
-          ariaLabel={`Add ${current.name} to favorites`}
+          ariaLabel={t('swipe.favorite_aria', { name: current.name })}
         />
       </div>
-      {capReached && (
-        <p className="text-center text-sm text-amber-700">
-          You&apos;ve hit the 200-favorite anonymous cap. Create an account to keep saving.
-        </p>
-      )}
+      {capReached && <p className="text-center text-sm text-amber-700">{t('swipe.cap_warning')}</p>}
     </div>
   )
 }

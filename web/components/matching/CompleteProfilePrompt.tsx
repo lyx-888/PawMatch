@@ -1,4 +1,5 @@
 import { cn } from '@/lib/cn'
+import { t } from '@/lib/i18n'
 
 type Props = {
   className?: string
@@ -17,7 +18,7 @@ export function CompleteProfilePrompt({ className }: Props): React.ReactElement 
         className,
       )}
     >
-      Complete the three onboarding questions to get a real match score.
+      {t('match.complete_profile_prompt')}
     </p>
   )
 }

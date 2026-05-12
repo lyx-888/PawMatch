@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { cn } from '@/lib/cn'
 import { formatAge } from '@/lib/format'
+import { t } from '@/lib/i18n'
 import type { Pet } from '@/types/pet'
 
 type Source = { id: string; name: string }
@@ -74,58 +75,58 @@ export function SearchClient({ sources }: Props): React.ReactElement {
   return (
     <div className="flex flex-col gap-6">
       <fieldset className="grid grid-cols-2 gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-stone-200">
-        <legend className="sr-only">Filters</legend>
+        <legend className="sr-only">{t('search.filters_legend')}</legend>
         <FilterSelect
-          label="Species"
+          label={t('search.label.species')}
           value={filters.species}
           onChange={(v) => set('species', v)}
           options={[
-            { value: '', label: 'Any' },
-            { value: 'dog', label: 'Dog' },
-            { value: 'cat', label: 'Cat' },
-            { value: 'rabbit', label: 'Rabbit' },
-            { value: 'other', label: 'Other' },
+            { value: '', label: t('search.opt.any') },
+            { value: 'dog', label: t('search.opt.dog') },
+            { value: 'cat', label: t('search.opt.cat') },
+            { value: 'rabbit', label: t('search.opt.rabbit') },
+            { value: 'other', label: t('search.opt.other') },
           ]}
         />
         <FilterSelect
-          label="Size"
+          label={t('search.label.size')}
           value={filters.size}
           onChange={(v) => set('size', v)}
           options={[
-            { value: '', label: 'Any' },
-            { value: 'small', label: 'Small' },
-            { value: 'medium', label: 'Medium' },
-            { value: 'large', label: 'Large' },
+            { value: '', label: t('search.opt.any') },
+            { value: 'small', label: t('search.opt.small') },
+            { value: 'medium', label: t('search.opt.medium') },
+            { value: 'large', label: t('search.opt.large') },
           ]}
         />
         <FilterSelect
-          label="Shelter"
+          label={t('search.label.shelter')}
           value={filters.source}
           onChange={(v) => set('source', v)}
           options={[
-            { value: '', label: 'Any' },
+            { value: '', label: t('search.opt.any') },
             ...sources.map((s) => ({ value: s.id, label: s.name })),
           ]}
         />
         <FilterSelect
-          label="Max age"
+          label={t('search.label.max_age')}
           value={filters.ageMaxMonths}
           onChange={(v) => set('ageMaxMonths', v)}
           options={[
-            { value: '', label: 'Any' },
-            { value: '6', label: 'Under 6 mo' },
-            { value: '12', label: 'Under 1 yr' },
-            { value: '36', label: 'Under 3 yr' },
-            { value: '84', label: 'Under 7 yr' },
+            { value: '', label: t('search.opt.any') },
+            { value: '6', label: t('search.opt.under_6m') },
+            { value: '12', label: t('search.opt.under_1y') },
+            { value: '36', label: t('search.opt.under_3y') },
+            { value: '84', label: t('search.opt.under_7y') },
           ]}
         />
         <div className="col-span-2 flex items-center justify-between text-xs text-stone-600">
           <p>
             {count === null
-              ? 'Loading…'
+              ? t('search.loading')
               : hasMore
-                ? `Showing first ${count} matches`
-                : `${count} match${count === 1 ? '' : 'es'}`}
+                ? t('search.showing_first', { count })
+                : t(count === 1 ? 'search.match_one' : 'search.match_other', { count })}
             {error && <span className="ml-2 text-rose-600">{error}</span>}
           </p>
           <button
@@ -133,16 +134,14 @@ export function SearchClient({ sources }: Props): React.ReactElement {
             onClick={clear}
             className="font-medium text-amber-700 underline-offset-2 hover:underline focus-visible:underline"
           >
-            Clear filters
+            {t('search.clear')}
           </button>
         </div>
       </fieldset>
 
       {pets && pets.length === 0 && (
         <div className="rounded-2xl border-2 border-dashed border-stone-200 bg-white p-6 text-center">
-          <p className="text-sm text-stone-700">
-            No pets match these filters. Try widening — or come back tomorrow when new pets arrive.
-          </p>
+          <p className="text-sm text-stone-700">{t('search.empty')}</p>
         </div>
       )}
 

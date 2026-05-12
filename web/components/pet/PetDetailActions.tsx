@@ -5,6 +5,7 @@ import { useCallback, useState } from 'react'
 
 import { cn } from '@/lib/cn'
 import { track } from '@/lib/analytics'
+import { t } from '@/lib/i18n'
 import { useFavorites, usePasses } from '@/lib/local-state'
 import type { Pet } from '@/types/pet'
 
@@ -38,8 +39,11 @@ export function PetDetailActions({ pet, className }: Props): React.ReactElement 
 
   const onShare = useCallback(async () => {
     const shareData = {
-      title: `${pet.name} on PawMatch SG`,
-      text: `Look at ${pet.name} — available at ${pet.source.toUpperCase()}.`,
+      title: t('actions.share_title', {
+        name: pet.name,
+        brand: `${t('app.brand')} ${t('app.brand_suffix')}`,
+      }),
+      text: t('actions.share_text', { name: pet.name, source: pet.source.toUpperCase() }),
       url: typeof window !== 'undefined' ? window.location.href : pet.sourceUrl,
     }
     track('pet_shared', { pet_id: pet.id, source: pet.source })
@@ -65,15 +69,15 @@ export function PetDetailActions({ pet, className }: Props): React.ReactElement 
         onClick={() => track('handoff_clicked', { pet_id: pet.id, source: pet.source })}
         className="flex h-12 w-full items-center justify-center rounded-full bg-amber-600 px-6 text-base font-semibold text-white shadow-sm transition hover:bg-amber-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
       >
-        View on {pet.source.replace(/_/g, ' ').toUpperCase()}
+        {t('pet_detail.view_on', { source: pet.source.replace(/_/g, ' ').toUpperCase() })}
       </a>
 
       <div className="grid grid-cols-3 gap-2">
         <ActionButton
-          label={isFavorite ? 'Saved' : 'Save'}
-          ariaLabel={
-            isFavorite ? `Remove ${pet.name} from favorites` : `Save ${pet.name} to favorites`
-          }
+          label={isFavorite ? t('actions.saved') : t('actions.save')}
+          ariaLabel={t(isFavorite ? 'actions.save_aria_remove' : 'actions.save_aria_add', {
+            name: pet.name,
+          })}
           onClick={() => {
             if (isFavorite) favorites.remove(pet.id)
             else {
@@ -85,15 +89,15 @@ export function PetDetailActions({ pet, className }: Props): React.ReactElement 
           intent={isFavorite ? 'active' : 'idle'}
         />
         <ActionButton
-          label={isPassed ? 'Passed' : 'Pass'}
-          ariaLabel={`Pass on ${pet.name}`}
+          label={isPassed ? t('actions.passed') : t('actions.pass')}
+          ariaLabel={t('actions.pass_aria', { name: pet.name })}
           onClick={onPass}
           disabled={passed}
           intent={isPassed ? 'active' : 'idle'}
         />
         <ActionButton
-          label={shared === 'copied' ? 'Copied' : 'Share'}
-          ariaLabel={`Share ${pet.name}`}
+          label={shared === 'copied' ? t('actions.copied') : t('actions.share')}
+          ariaLabel={t('actions.share_aria', { name: pet.name })}
           onClick={onShare}
           intent={shared ? 'active' : 'idle'}
         />

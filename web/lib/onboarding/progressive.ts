@@ -48,7 +48,7 @@ export type ProgressiveContext = {
 
 // --- Question registry ----------------------------------------------------
 
-export type ProgressiveOption<T> = { value: T; label: string }
+export type ProgressiveOption<T> = { value: T; labelKey: string }
 
 // Mapping from question id to the value type it sets on ProfileDraft.
 // Encoded as a discriminated union so `applyAnswer` is type-safe.
@@ -64,7 +64,7 @@ export type ProgressiveQuestionId = ProgressiveAnswer['id']
 
 type RegistryEntry<A extends ProgressiveAnswer> = {
   id: A['id']
-  prompt: string
+  promptKey: string
   options: ProgressiveOption<A['value']>[]
   shouldTrigger: (draft: ProfileDraft, ctx: ProgressiveContext) => boolean
 }
@@ -77,31 +77,31 @@ export type ProgressiveQuestion = RegistryEntry<ProgressiveAnswer>
 export const PROGRESSIVE_QUESTIONS: ProgressiveQuestion[] = [
   {
     id: 'mesh_status',
-    prompt: 'Do you have meshed windows? (Required for cat adoption in SG)',
+    promptKey: 'progressive.mesh_status.prompt',
     options: [
-      { value: 'meshed', label: 'Yes, meshed' },
-      { value: 'not_meshed', label: 'Not meshed' },
-      { value: 'planning', label: 'Planning to' },
+      { value: 'meshed', labelKey: 'progressive.mesh_status.opt.meshed' },
+      { value: 'not_meshed', labelKey: 'progressive.mesh_status.opt.not_meshed' },
+      { value: 'planning', labelKey: 'progressive.mesh_status.opt.planning' },
     ],
     shouldTrigger: (draft, ctx) => draft.mesh_status == null && ctx.viewingPetSpecies === 'cat',
   },
   {
     id: 'special_needs_ok',
-    prompt: 'Open to special-needs pets?',
+    promptKey: 'progressive.special_needs_ok.prompt',
     options: [
-      { value: true, label: 'Yes' },
-      { value: false, label: 'Not right now' },
+      { value: true, labelKey: 'progressive.special_needs_ok.opt.yes' },
+      { value: false, labelKey: 'progressive.special_needs_ok.opt.no' },
     ],
     shouldTrigger: (draft, ctx) =>
       draft.special_needs_ok == null && ctx.viewingPetIsSpecialNeeds === true,
   },
   {
     id: 'activity_level',
-    prompt: 'What activity level fits your lifestyle?',
+    promptKey: 'progressive.activity_level.prompt',
     options: [
-      { value: 'sedentary', label: 'Sedentary' },
-      { value: 'moderate', label: 'Moderate' },
-      { value: 'very_active', label: 'Very active' },
+      { value: 'sedentary', labelKey: 'progressive.activity_level.opt.sedentary' },
+      { value: 'moderate', labelKey: 'progressive.activity_level.opt.moderate' },
+      { value: 'very_active', labelKey: 'progressive.activity_level.opt.very_active' },
     ],
     // Fires on the first Stretch-tier card the user sees. Dormant until the
     // matching engine starts populating `viewingPetTier`.
@@ -109,33 +109,33 @@ export const PROGRESSIVE_QUESTIONS: ProgressiveQuestion[] = [
   },
   {
     id: 'work_pattern',
-    prompt: 'What does your typical day look like?',
+    promptKey: 'progressive.work_pattern.prompt',
     options: [
-      { value: 'wfh', label: 'Work from home' },
-      { value: 'hybrid', label: 'Hybrid' },
-      { value: 'office', label: 'Mostly in office' },
-      { value: 'shift', label: 'Shift work' },
-      { value: 'other', label: 'Other' },
+      { value: 'wfh', labelKey: 'progressive.work_pattern.opt.wfh' },
+      { value: 'hybrid', labelKey: 'progressive.work_pattern.opt.hybrid' },
+      { value: 'office', labelKey: 'progressive.work_pattern.opt.office' },
+      { value: 'shift', labelKey: 'progressive.work_pattern.opt.shift' },
+      { value: 'other', labelKey: 'progressive.work_pattern.opt.other' },
     ],
     shouldTrigger: (draft, ctx) => draft.work_pattern == null && ctx.favoritesCount >= 1,
   },
   {
     id: 'experience',
-    prompt: 'Prior pet experience?',
+    promptKey: 'progressive.experience.prompt',
     options: [
-      { value: 'first_time', label: 'First-time' },
-      { value: 'some', label: 'Some' },
-      { value: 'experienced', label: 'Lots' },
+      { value: 'first_time', labelKey: 'progressive.experience.opt.first_time' },
+      { value: 'some', labelKey: 'progressive.experience.opt.some' },
+      { value: 'experienced', labelKey: 'progressive.experience.opt.experienced' },
     ],
     shouldTrigger: (draft, ctx) => draft.experience == null && ctx.favoritesCount >= 3,
   },
   {
     id: 'budget_tier',
-    prompt: 'Monthly budget for pet care?',
+    promptKey: 'progressive.budget_tier.prompt',
     options: [
-      { value: 'low', label: 'Under S$100' },
-      { value: 'medium', label: 'S$100–300' },
-      { value: 'high', label: 'S$300+' },
+      { value: 'low', labelKey: 'progressive.budget_tier.opt.low' },
+      { value: 'medium', labelKey: 'progressive.budget_tier.opt.medium' },
+      { value: 'high', labelKey: 'progressive.budget_tier.opt.high' },
     ],
     shouldTrigger: (draft, ctx) => draft.budget_tier == null && ctx.justSavedSearch === true,
   },

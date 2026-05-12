@@ -3,6 +3,7 @@
 import { useState } from 'react'
 
 import { cn } from '@/lib/cn'
+import { t } from '@/lib/i18n'
 
 // Photo carousel used inside swipe cards and the detail page. Tap left/right
 // half cycles by one; keyboard arrows do the same. Index dots reflect the
@@ -49,7 +50,7 @@ export function PetGalleryCarousel({
         className,
       )}
       role="group"
-      aria-label={`${alt} photo gallery`}
+      aria-label={t('gallery.aria', { alt })}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
@@ -73,13 +74,13 @@ export function PetGalleryCarousel({
             type="button"
             className="absolute inset-y-0 left-0 w-1/3 cursor-pointer outline-none focus-visible:bg-black/10"
             onClick={() => advance(-1)}
-            aria-label="Previous photo"
+            aria-label={t('gallery.prev')}
           />
           <button
             type="button"
             className="absolute inset-y-0 right-0 w-1/3 cursor-pointer outline-none focus-visible:bg-black/10"
             onClick={() => advance(1)}
-            aria-label="Next photo"
+            aria-label={t('gallery.next')}
           />
           <div className="pointer-events-none absolute inset-x-0 top-3 flex justify-center gap-1 px-4">
             {safePhotos.map((_, i) => (

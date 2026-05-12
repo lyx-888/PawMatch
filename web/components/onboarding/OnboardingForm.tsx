@@ -3,6 +3,7 @@
 import { useState } from 'react'
 
 import { cn } from '@/lib/cn'
+import { t } from '@/lib/i18n'
 import { mergeProfileDraft, type ProfileDraft } from '@/lib/onboarding/profile-draft'
 
 type Props = {
@@ -19,23 +20,23 @@ type Props = {
 // answers one question then closes still has progress saved) and calls
 // `onComplete` once all three are answered.
 
-const HOUSING_OPTIONS: { value: NonNullable<ProfileDraft['housing_type']>; label: string }[] = [
-  { value: 'hdb', label: 'HDB' },
-  { value: 'condo', label: 'Condo' },
-  { value: 'landed', label: 'Landed' },
-  { value: 'other', label: 'Other' },
+const HOUSING_OPTIONS: { value: NonNullable<ProfileDraft['housing_type']>; labelKey: string }[] = [
+  { value: 'hdb', labelKey: 'onboarding.opt.hdb' },
+  { value: 'condo', labelKey: 'onboarding.opt.condo' },
+  { value: 'landed', labelKey: 'onboarding.opt.landed' },
+  { value: 'other', labelKey: 'onboarding.opt.other' },
 ]
 
-const KIDS_OPTIONS: { value: boolean; label: string }[] = [
-  { value: true, label: 'Yes' },
-  { value: false, label: 'No' },
+const KIDS_OPTIONS: { value: boolean; labelKey: string }[] = [
+  { value: true, labelKey: 'onboarding.opt.yes' },
+  { value: false, labelKey: 'onboarding.opt.no' },
 ]
 
-const OTHER_PETS_OPTIONS: { value: NonNullable<ProfileDraft['other_pets']>; label: string }[] = [
-  { value: 'none', label: 'None' },
-  { value: 'cats', label: 'Cats' },
-  { value: 'dogs', label: 'Dogs' },
-  { value: 'both', label: 'Both' },
+const OTHER_PETS_OPTIONS: { value: NonNullable<ProfileDraft['other_pets']>; labelKey: string }[] = [
+  { value: 'none', labelKey: 'onboarding.opt.none' },
+  { value: 'cats', labelKey: 'onboarding.opt.cats' },
+  { value: 'dogs', labelKey: 'onboarding.opt.dogs' },
+  { value: 'both', labelKey: 'onboarding.opt.both' },
 ]
 
 export function OnboardingForm({ onComplete, onClose, className }: Props): React.ReactElement {
@@ -68,12 +69,12 @@ export function OnboardingForm({ onComplete, onClose, className }: Props): React
     >
       <div className="flex items-start justify-between gap-3">
         <h2 id="onboarding-form-heading" className="text-lg font-bold text-stone-900">
-          Three quick questions
+          {t('onboarding.form_heading')}
         </h2>
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close onboarding"
+          aria-label={t('onboarding.form_close_aria')}
           className="-mt-1 -mr-2 rounded-full p-2 text-stone-500 transition hover:bg-stone-100 hover:text-stone-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-400"
         >
           <span aria-hidden="true" className="text-xl leading-none">
@@ -81,12 +82,12 @@ export function OnboardingForm({ onComplete, onClose, className }: Props): React
           </span>
         </button>
       </div>
-      <p className="mt-1 text-sm text-stone-600">
-        These power your match score. You can change them anytime.
-      </p>
+      <p className="mt-1 text-sm text-stone-600">{t('onboarding.form_intro')}</p>
 
       <fieldset className="mt-5">
-        <legend className="text-sm font-semibold text-stone-900">Where do you live?</legend>
+        <legend className="text-sm font-semibold text-stone-900">
+          {t('onboarding.q_housing')}
+        </legend>
         <OptionGrid
           name="housing_type"
           options={HOUSING_OPTIONS}
@@ -96,7 +97,7 @@ export function OnboardingForm({ onComplete, onClose, className }: Props): React
       </fieldset>
 
       <fieldset className="mt-5">
-        <legend className="text-sm font-semibold text-stone-900">Kids in your household?</legend>
+        <legend className="text-sm font-semibold text-stone-900">{t('onboarding.q_kids')}</legend>
         <OptionGrid
           name="has_kids"
           options={KIDS_OPTIONS}
@@ -106,7 +107,9 @@ export function OnboardingForm({ onComplete, onClose, className }: Props): React
       </fieldset>
 
       <fieldset className="mt-5">
-        <legend className="text-sm font-semibold text-stone-900">Other pets at home?</legend>
+        <legend className="text-sm font-semibold text-stone-900">
+          {t('onboarding.q_other_pets')}
+        </legend>
         <OptionGrid
           name="other_pets"
           options={OTHER_PETS_OPTIONS}
@@ -121,7 +124,7 @@ export function OnboardingForm({ onComplete, onClose, className }: Props): React
           onClick={onClose}
           className="rounded-full px-3 py-1.5 text-sm font-medium text-stone-600 transition hover:text-stone-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-400"
         >
-          Save & continue
+          {t('onboarding.form_save')}
         </button>
         <button
           type="button"
@@ -129,7 +132,7 @@ export function OnboardingForm({ onComplete, onClose, className }: Props): React
           disabled={!allAnswered}
           className="rounded-full bg-amber-600 px-4 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700 disabled:cursor-not-allowed disabled:bg-stone-300 disabled:text-stone-500"
         >
-          Done
+          {t('onboarding.form_done')}
         </button>
       </div>
     </div>
@@ -138,7 +141,7 @@ export function OnboardingForm({ onComplete, onClose, className }: Props): React
 
 type OptionGridProps<T> = {
   name: string
-  options: { value: T; label: string }[]
+  options: { value: T; labelKey: string }[]
   value: T | null
   onSelect: (value: T) => void
 }
@@ -171,7 +174,7 @@ function OptionGrid<T extends string | boolean>({
                 : 'border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:bg-stone-50',
             )}
           >
-            {opt.label}
+            {t(opt.labelKey)}
           </button>
         )
       })}

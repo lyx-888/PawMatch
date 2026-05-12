@@ -1,16 +1,10 @@
 import { cn } from '@/lib/cn'
+import { t } from '@/lib/i18n'
 import type { Tier } from '@/lib/matching/types'
 
 type Props = {
   tier: Tier
   className?: string
-}
-
-const TIER_LABEL: Record<Tier, string> = {
-  great: 'Great match',
-  good: 'Good match',
-  stretch: 'Stretch',
-  hard_fail: 'Not eligible',
 }
 
 // Colour scale per requirements §2.3 — distinct enough that a user
@@ -23,17 +17,18 @@ const TIER_CLASS: Record<Tier, string> = {
 }
 
 export function TierBadge({ tier, className }: Props): React.ReactElement {
+  const label = t(`match.tier.${tier}`)
   return (
     <span
       role="status"
-      aria-label={`Match tier: ${TIER_LABEL[tier]}`}
+      aria-label={t('match.tier_aria', { tier: label })}
       className={cn(
         'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold',
         TIER_CLASS[tier],
         className,
       )}
     >
-      {TIER_LABEL[tier]}
+      {label}
     </span>
   )
 }

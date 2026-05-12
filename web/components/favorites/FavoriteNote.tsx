@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 
 import { cn } from '@/lib/cn'
+import { t } from '@/lib/i18n'
 import { useFavorites, useFavoriteNote } from '@/lib/local-state'
 import { NOTE_MAX_LENGTH, sanitizeNote } from '@/lib/notes/sanitize'
 
@@ -71,7 +72,7 @@ export function FavoriteNote({
           htmlFor={inputId}
           className="text-sm font-medium text-stone-900"
         >
-          Your note
+          {t('note.label')}
         </label>
         <span
           className={cn(
@@ -80,7 +81,9 @@ export function FavoriteNote({
           )}
           aria-live="polite"
         >
-          {saved ? 'Saved' : `${draft.length}/${NOTE_MAX_LENGTH}`}
+          {saved
+            ? t('note.saved')
+            : t('note.counter', { used: draft.length, max: NOTE_MAX_LENGTH })}
         </span>
       </div>
       <textarea
@@ -93,14 +96,12 @@ export function FavoriteNote({
           const next = e.target.value.slice(0, NOTE_MAX_LENGTH)
           setDraft(next)
         }}
-        placeholder={`A reminder about ${petName}…`}
+        placeholder={t('note.placeholder', { name: petName })}
         rows={3}
         maxLength={NOTE_MAX_LENGTH}
         className="w-full resize-none rounded-2xl border border-stone-200 bg-white px-3 py-2 text-sm text-stone-900 placeholder:text-stone-400 focus:border-amber-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
       />
-      <p className="text-xs text-stone-500">
-        Saved on this device. Notes move with you when you create an account.
-      </p>
+      <p className="text-xs text-stone-500">{t('note.footer')}</p>
     </section>
   )
 }

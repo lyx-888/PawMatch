@@ -7,6 +7,7 @@ import { ReasonList } from '@/components/matching/ReasonList'
 import { TierBadge } from '@/components/matching/TierBadge'
 import { cn } from '@/lib/cn'
 import { formatAge, titleCase } from '@/lib/format'
+import { t } from '@/lib/i18n'
 import { useMatchScore } from '@/lib/matching/use-score'
 import type { Pet } from '@/types/pet'
 
@@ -36,7 +37,13 @@ export function SwipeCard({ pet, className }: Props): React.ReactElement {
         className,
       )}
     >
-      <PetGalleryCarousel photos={pet.photoUrls} alt={`${pet.name}, a ${species ?? 'pet'}`} />
+      <PetGalleryCarousel
+        photos={pet.photoUrls}
+        alt={t('pet_card.photo_alt', {
+          name: pet.name,
+          species: species ?? t('pet_card.species_fallback'),
+        })}
+      />
 
       <div className="flex flex-1 flex-col gap-3 p-5">
         <header className="flex items-start justify-between gap-3">
@@ -63,7 +70,7 @@ export function SwipeCard({ pet, className }: Props): React.ReactElement {
             href={`/pets/${pet.id}`}
             className="font-medium text-amber-700 underline-offset-2 hover:underline focus-visible:underline"
           >
-            More about {pet.name}
+            {t('pet_card.more_about', { name: pet.name })}
           </Link>
         </div>
       </div>

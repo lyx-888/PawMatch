@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 
 import { cn } from '@/lib/cn'
 import { track } from '@/lib/analytics'
+import { t } from '@/lib/i18n'
 import {
   answerProgressive,
   markProgressiveAsked,
@@ -58,7 +59,7 @@ function Card({ question, className }: CardProps): React.ReactElement {
     >
       <div className="flex items-start justify-between gap-3">
         <p id={`progressive-${question.id}`} className="text-sm font-semibold">
-          {question.prompt}
+          {t(question.promptKey)}
         </p>
         <button
           type="button"
@@ -66,7 +67,7 @@ function Card({ question, className }: CardProps): React.ReactElement {
             markProgressiveDismissed(question.id)
             track('progressive_question_dismissed', { question_id: question.id })
           }}
-          aria-label="Dismiss question"
+          aria-label={t('onboarding.progressive.dismiss_aria')}
           className="-mt-1 -mr-1 rounded-full p-1 text-stone-500 transition hover:bg-stone-100 hover:text-stone-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-400"
         >
           <span aria-hidden="true" className="text-lg leading-none">
@@ -93,7 +94,7 @@ function Card({ question, className }: CardProps): React.ReactElement {
             }}
             className="rounded-full bg-amber-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition hover:bg-amber-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700"
           >
-            {opt.label}
+            {t(opt.labelKey)}
           </button>
         ))}
       </div>

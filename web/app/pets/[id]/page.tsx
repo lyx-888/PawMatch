@@ -9,6 +9,7 @@ import { PetGalleryCarousel } from '@/components/pet/PetGalleryCarousel'
 import { PetReadinessSnippet } from '@/components/readiness/PetReadinessSnippet'
 import { formatAge, relativeFromNow, titleCase } from '@/lib/format'
 import { getPetById, getSourceSummaries, summarizeForHeader } from '@/lib/db/pets'
+import { t } from '@/lib/i18n'
 import type { ProgressiveContext } from '@/lib/onboarding/progressive'
 
 type Props = {
@@ -45,20 +46,29 @@ export default async function PetDetailPage({ params }: Props): Promise<React.Re
     viewingPetIsSpecialNeeds: pet.tags.includes('special_needs'),
   }
 
+  const unknown = t('pet_detail.value.unknown')
   // Always render every standard attribute so the panel layout is consistent
   // across pets — shelters frequently omit fields and we want adopters to see
   // the gap rather than a Details card that silently shrinks.
   const attributes: Array<{ label: string; value: string }> = [
-    { label: 'Species', value: titleCase(pet.species) ?? 'Unknown' },
-    { label: 'Breed', value: pet.breed ?? 'Unknown' },
-    { label: 'Sex', value: titleCase(pet.sex) ?? 'Unknown' },
-    { label: 'Age', value: formatAge(pet.ageMonths) ?? 'Unknown' },
-    { label: 'Size', value: titleCase(pet.size) ?? 'Unknown' },
+    { label: t('pet_detail.field.species'), value: titleCase(pet.species) ?? unknown },
+    { label: t('pet_detail.field.breed'), value: pet.breed ?? unknown },
+    { label: t('pet_detail.field.sex'), value: titleCase(pet.sex) ?? unknown },
+    { label: t('pet_detail.field.age'), value: formatAge(pet.ageMonths) ?? unknown },
+    { label: t('pet_detail.field.size'), value: titleCase(pet.size) ?? unknown },
     {
-      label: 'HDB-approved',
-      value: pet.hdbApproved === null ? 'Unknown' : pet.hdbApproved ? 'Yes' : 'No',
+      label: t('pet_detail.field.hdb_approved'),
+      value:
+        pet.hdbApproved === null
+          ? unknown
+          : pet.hdbApproved
+            ? t('pet_detail.value.yes')
+            : t('pet_detail.value.no'),
     },
-    { label: 'Tags', value: pet.tags.length > 0 ? pet.tags.join(', ') : 'None' },
+    {
+      label: t('pet_detail.field.tags'),
+      value: pet.tags.length > 0 ? pet.tags.join(', ') : t('pet_detail.value.none'),
+    },
   ]
 
   return (
@@ -68,7 +78,10 @@ export default async function PetDetailPage({ params }: Props): Promise<React.Re
         <section>
           <PetGalleryCarousel
             photos={pet.photoUrls}
-            alt={`${pet.name}, ${titleCase(pet.species) ?? 'pet'}`}
+            alt={t('pet_card.photo_alt', {
+              name: pet.name,
+              species: titleCase(pet.species) ?? t('pet_card.species_fallback'),
+            })}
             rounded
           />
         </section>
@@ -79,11 +92,17 @@ export default async function PetDetailPage({ params }: Props): Promise<React.Re
             <StatusBadge status={pet.status} />
           </div>
           <p className="text-sm text-stone-600 capitalize">
-            {pet.source.replace(/_/g, ' ')} · listed {relativeFromNow(pet.firstSeenAt)}
+            {t('pet_detail.listed', {
+              source: pet.source.replace(/_/g, ' '),
+              time: relativeFromNow(pet.firstSeenAt) ?? '',
+            })}
             {isStale && (
               <>
                 {' '}
-                · <span className="font-medium text-amber-700">verify on shelter site</span>
+                ·{' '}
+                <span className="font-medium text-amber-700">
+                  {t('pet_detail.verify_on_shelter')}
+                </span>
               </>
             )}
           </p>
@@ -101,18 +120,18 @@ export default async function PetDetailPage({ params }: Props): Promise<React.Re
 
         <section aria-labelledby="about">
           <h2 id="about" className="text-lg font-semibold text-stone-900">
-            About {pet.name}
+            {t('pet_detail.about', { name: pet.name })}
           </h2>
           {pet.description ? (
             <p className="mt-2 text-sm whitespace-pre-line text-stone-700">{pet.description}</p>
           ) : (
-            <p className="mt-2 text-sm text-stone-500">No description provided by the shelter.</p>
+            <p className="mt-2 text-sm text-stone-500">{t('pet_detail.about_empty')}</p>
           )}
         </section>
 
         <section aria-labelledby="attributes">
           <h2 id="attributes" className="text-lg font-semibold text-stone-900">
-            Details
+            {t('pet_detail.details')}
           </h2>
           <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
             {attributes.map((row) => (
