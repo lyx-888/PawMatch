@@ -5,17 +5,23 @@ the paginated archive at /animal/?paged={n} lists 12 cards per page. The cards
 expose name, primary photo, source URL, programme (adoption / rehoming /
 fostering / lost-found), and a status badge. The detail page adds the structured
 fields the matching engine needs: species, sex, age, breed, description, gallery.
+
+Two detail-page layouts coexist: the older one renders fields as `.sam-field-row`
+label/value pairs; the newer one only carries `Species` in `.sam-quick-facts`
+and inlines Name/Gender/Breed/Colour/Age into the description as
+`<strong>Label:</strong> Value<br>`. The parser handles both and merges results.
 """
 
 from __future__ import annotations
 
+import html as html_lib
 import logging
 import re
 from dataclasses import dataclass
 from urllib.parse import urljoin
 
 import httpx
-from selectolax.parser import HTMLParser
+from selectolax.parser import HTMLParser, Node
 
 from base import PetRecord, Sex, Species, Status, get_http_client
 
@@ -36,6 +42,25 @@ _ANIMAL_TYPE_TO_SPECIES: dict[str, Species] = {
     "rabbit": "rabbit",
     "rabbits": "rabbit",
 }
+
+# Labels that appear inline at the top of a description as `<strong>X:</strong> Y<br>`.
+# We peel these off so the narrative starts at the first prose paragraph and the
+# values supplement the structured Quick-Facts list when those are missing.
+_INLINE_FIELD_LABELS: frozenset[str] = frozenset(
+    {
+        "name",
+        "gender",
+        "sex",
+        "breed",
+        "colour",
+        "color",
+        "age",
+        "species",
+        "animal type",
+        "weight",
+        "size",
+    }
+)
 
 
 @dataclass(frozen=True)
@@ -165,14 +190,18 @@ def _parse_detail(html: str) -> _Detail | None:
         return None
 
     fields = _extract_fields(tree)
+    description, inline_fields = _extract_story(tree)
 
-    species = _ANIMAL_TYPE_TO_SPECIES.get(fields.get("animal type", "").lower(), "other")
-    sex = _parse_sex(fields.get("gender"))
+    # Inline fields supplement the structured ones — the new SPCA layout only
+    # publishes `Species` in Quick Facts and inlines the rest in the description.
+    for key, value in inline_fields.items():
+        fields.setdefault(key, value)
+
+    species_raw = (fields.get("species") or fields.get("animal type") or "").lower()
+    species = _ANIMAL_TYPE_TO_SPECIES.get(species_raw, "other")
+    sex = _parse_sex(fields.get("gender") or fields.get("sex"))
     age_months = _parse_age_months(fields.get("age"))
     breed = fields.get("breed") or None
-
-    story_node = tree.css_first(".sam-story-content")
-    description = story_node.text(strip=True) if story_node else None
 
     photo_urls = _collect_photos(tree)
 
@@ -188,10 +217,13 @@ def _parse_detail(html: str) -> _Detail | None:
 
 
 def _extract_fields(tree: HTMLParser) -> dict[str, str]:
-    """Collect the labelled field rows into a lowercase-keyed dict.
+    """Collect labelled field rows into a lowercase-keyed dict.
 
-    Labels arrive prefixed with emoji (e.g. '📅 Date Posted'); we strip those
-    so a key like 'date posted' is consistent regardless of font support.
+    Supports both detail-page layouts: the older `.sam-field-row` (label/value
+    pairs) and the newer `.sam-quick-facts` list. Labels arrive prefixed with
+    emoji (e.g. '📅 Date Posted' or '🐾 Species'); we strip those so the key
+    is consistent regardless of font support. The first source to provide a
+    label wins so a `.sam-field-row` value isn't clobbered by Quick Facts.
     """
 
     out: dict[str, str] = {}
@@ -202,8 +234,157 @@ def _extract_fields(tree: HTMLParser) -> dict[str, str]:
             continue
         label = _strip_emoji(label_node.text(strip=True)).lower()
         if label:
-            out[label] = value_node.text(strip=True)
+            out.setdefault(label, value_node.text(strip=True))
+    for li in tree.css(".sam-quick-facts li"):
+        label_node = li.css_first(".sam-fact-label")
+        value_node = li.css_first(".sam-fact-value")
+        if not label_node or not value_node:
+            continue
+        label = _strip_emoji(label_node.text(strip=True)).lower()
+        if label:
+            out.setdefault(label, value_node.text(strip=True))
     return out
+
+
+def _extract_story(tree: HTMLParser) -> tuple[str | None, dict[str, str]]:
+    """Render every story section to readable plain text.
+
+    Walks all `.sam-story-section` blocks in document order, converts each
+    block's HTML to text (preserving paragraph and `<br>` boundaries), and
+    peels any leading `Label: Value` lines off the first section into the
+    returned `inline_fields` dict. When more than one section is present the
+    section heading is included so the reader can tell them apart; with only
+    one section the heading would just duplicate the page's "About <Name>" UI
+    label, so we drop it.
+    """
+
+    rendered: list[tuple[str | None, str]] = []
+    inline_fields: dict[str, str] = {}
+
+    sections = tree.css("div.sam-story-section")
+    if not sections:
+        # Some pages drop the section wrapper and put content directly in
+        # `.sam-story-content`. Fall back to that so we still surface text.
+        for bare_content in tree.css(".sam-story-content"):
+            text = _html_to_text(bare_content)
+            if text:
+                rendered.append((None, text))
+    else:
+        for index, section in enumerate(sections):
+            section_content = section.css_first(".sam-story-content")
+            if section_content is None:
+                continue
+            text = _html_to_text(section_content)
+            if not text:
+                continue
+            if index == 0:
+                text, inline_fields = _peel_inline_fields(text)
+            if not text:
+                continue
+            heading_node = section.css_first("h2")
+            heading = heading_node.text(strip=True) if heading_node else None
+            rendered.append((heading, text))
+
+    if not rendered:
+        return None, inline_fields
+
+    if len(rendered) == 1:
+        return rendered[0][1], inline_fields
+
+    parts: list[str] = []
+    for heading, body in rendered:
+        if heading and not re.match(r"(?i)^about\b", heading):
+            parts.append(f"{heading}\n{body}")
+        else:
+            parts.append(body)
+    return "\n\n".join(parts), inline_fields
+
+
+def _html_to_text(node: Node) -> str:
+    """Render an HTML node to readable plain text.
+
+    `<br>` becomes a single newline and `</p>` becomes a paragraph break;
+    other tags are stripped. HTML entities are decoded. Per-line whitespace
+    runs collapse to a single space and consecutive blank lines collapse to
+    one — selectolax's `.text(strip=True)` would have concatenated adjacent
+    text nodes with no separator at all, producing the run-on
+    `Name:MochiGender:Female...` we are fixing here.
+    """
+
+    raw = node.html or ""
+    # SPCA's WordPress block editor emits `<br data-start="..." />` with attrs,
+    # so we accept any attributes between the tag name and the closing bracket.
+    raw = re.sub(r"(?is)<br\b[^>]*>", "\n", raw)
+    raw = re.sub(r"(?is)</p\s*>", "\n\n", raw)
+    raw = re.sub(r"<[^>]+>", "", raw)
+    text = html_lib.unescape(raw)
+    lines = [re.sub(r"[ \t ]+", " ", line).strip() for line in text.split("\n")]
+    text = "\n".join(lines)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    text = _normalize_inline_bullets(text)
+    return text.strip()
+
+
+def _normalize_inline_bullets(text: str) -> str:
+    """Re-flow inline `•`-separated bullet runs as one item per line.
+
+    Shelter staff often type 'Likes: • A • B • C' inline because the WordPress
+    editor doesn't expose proper lists; the result reads as a wall of text on
+    the detail page. We split every ` • ` onto its own line, and when a bullet
+    line trails a `Heading:` label we lift that label onto its own line so the
+    rendered list keeps its grouping.
+
+    The heading split requires the next line to start with another bullet, so
+    a stray colon mid-prose can't accidentally pull a non-heading apart. Only
+    triggers when at least two bullets are present.
+    """
+
+    if text.count("•") < 2:
+        return text
+    text = re.sub(r"\s+•\s+", "\n• ", text)
+    # Heading split: any '<bullet text> <Capitalised Heading>:' followed by a
+    # new bullet line gets the heading lifted onto its own line. Lookahead on
+    # the next bullet keeps non-heading colons (e.g. 'Loves: chicken') safe.
+    text = re.sub(
+        r"(• [^\n]*?)\s+([A-Z][A-Za-z /&'\-]{1,60}:)(?=\s*\n• )",
+        r"\1\n\2",
+        text,
+    )
+    return text
+
+
+def _peel_inline_fields(text: str) -> tuple[str, dict[str, str]]:
+    """Strip leading `Label: Value` lines off a description.
+
+    The new SPCA layout inlines Name/Gender/Breed/Colour/Age into the
+    description as a `<strong>Label:</strong> Value<br>` block before the
+    narrative. After `_html_to_text` those become individual lines like
+    `Gender: Female`. We extract them as fields so the structured Details
+    panel can render them, and remove them from the body so the reader sees
+    just the prose.
+
+    Stops at the first non-matching line so a stray colon mid-narrative does
+    not eat the rest of the description.
+    """
+
+    fields: dict[str, str] = {}
+    lines = text.split("\n")
+    consumed = 0
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            consumed += 1
+            continue
+        match = re.match(r"^([A-Za-z][A-Za-z ]{0,30}):\s*(.+)$", stripped)
+        if match is None:
+            break
+        label = match.group(1).strip().lower()
+        if label not in _INLINE_FIELD_LABELS:
+            break
+        fields[label] = match.group(2).strip()
+        consumed += 1
+    remaining = "\n".join(lines[consumed:]).strip()
+    return remaining, fields
 
 
 def _collect_photos(tree: HTMLParser) -> list[str]:

@@ -6,6 +6,7 @@ is a verbatim copy of https://spca.org.sg/animal/ captured during Phase 1.3.
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import pytest
@@ -25,6 +26,15 @@ from sources.spca import (
 FIXTURES = Path(__file__).parent / "fixtures"
 ARCHIVE_FIXTURE = FIXTURES / "spca_animal_index.html"
 DETAIL_FIXTURE = FIXTURES / "spca_animal_sphinx.html"
+# Mochi's page uses the newer SPCA layout: structured fields are in
+# `.sam-quick-facts`, and Name/Gender/Breed/Colour/Age are inlined in the
+# description as `<strong>Label:</strong> Value<br>` pairs. Old layout is
+# Sphinx; both must keep parsing cleanly.
+MOCHI_FIXTURE = FIXTURES / "spca_animal_mochi.html"
+# Pablo's description is a single `<p>` with inline `•` bullets ('Likes: • A • B
+# • C What he dislikes: • D • E'). The parser must split bullets onto their own
+# lines so the rendered list reads as a list, not a wall of text.
+PABLO_FIXTURE = FIXTURES / "spca_animal_pablo.html"
 
 
 @pytest.fixture(scope="module")
@@ -35,6 +45,16 @@ def archive_html() -> str:
 @pytest.fixture(scope="module")
 def detail_html() -> str:
     return DETAIL_FIXTURE.read_text(encoding="utf-8")
+
+
+@pytest.fixture(scope="module")
+def mochi_detail_html() -> str:
+    return MOCHI_FIXTURE.read_text(encoding="utf-8")
+
+
+@pytest.fixture(scope="module")
+def pablo_detail_html() -> str:
+    return PABLO_FIXTURE.read_text(encoding="utf-8")
 
 
 class TestParseArchive:
@@ -113,6 +133,70 @@ class TestParseDetail:
         assert len(set(detail.photo_urls)) == len(detail.photo_urls)
         # The detail-page main image should be first.
         assert detail.photo_urls[0].endswith("IMG_0216.jpg")
+
+
+class TestParseDetailMochi:
+    """Regression coverage for SPCA's newer detail-page layout.
+
+    Quick Facts only carries `Species`; Name/Gender/Breed/Colour/Age are
+    inlined into the description. The parser must extract those into the
+    structured fields, AND emit a clean readable description (not the
+    `Name:MochiGender:Female...` run-on string `text(strip=True)` produced).
+    """
+
+    def test_extracts_core_fields(self, mochi_detail_html: str) -> None:
+        detail = _parse_detail(mochi_detail_html)
+        assert detail is not None
+        assert detail.name == "Mochi"
+        assert detail.species == "cat"
+        assert detail.sex == "female"
+        # "3 Years (as of February 2026)" -> 36 months
+        assert detail.age_months == 36
+        assert detail.breed and "domestic short hair" in detail.breed.lower()
+
+    def test_description_is_readable(self, mochi_detail_html: str) -> None:
+        detail = _parse_detail(mochi_detail_html)
+        assert detail is not None
+        assert detail.description is not None
+        # The inlined structured-fields header must NOT appear at the start of
+        # the prose — it's redundant with the Details panel and was the source
+        # of the run-on text.
+        assert not detail.description.startswith("Name:")
+        assert "Name:Mochi" not in detail.description
+        assert "Gender:Female" not in detail.description
+        # The narrative itself must survive intact.
+        assert detail.description.lstrip().startswith("Mochi is a sweet")
+        assert "blossoms gradually" in detail.description
+        # Paragraph breaks are preserved so `whitespace-pre-line` rendering on
+        # the detail page shows distinct paragraphs.
+        assert "\n\n" in detail.description
+
+
+class TestParseDetailPablo:
+    """Inline-bullet normalisation: 'Likes: • A • B • C' renders as a real list.
+
+    Pablo's description is a single `<p>` with bullet items separated by ` • `.
+    Without normalisation it renders as one long paragraph; we split bullets
+    onto their own lines and lift any `Heading:` label that ends up trailing
+    a previous bullet onto its own line.
+    """
+
+    def test_bullets_one_per_line(self, pablo_detail_html: str) -> None:
+        detail = _parse_detail(pablo_detail_html)
+        assert detail is not None
+        assert detail.description is not None
+        # No bullet should appear inline preceded by another bullet item; every
+        # bullet must start a new line.
+        assert " • " not in detail.description
+        assert detail.description.count("\n• ") >= 5
+
+    def test_heading_split_off_from_trailing_bullet(self, pablo_detail_html: str) -> None:
+        detail = _parse_detail(pablo_detail_html)
+        assert detail is not None
+        assert detail.description is not None
+        # The 'What he dislikes' heading was wedged onto the end of the last
+        # 'likes' bullet in the source; it must be moved onto its own line.
+        assert re.search(r"What he dislikes[^\n]*:\n• ", detail.description)
 
 
 class TestParseSex:
