@@ -2,10 +2,12 @@ import { notFound } from 'next/navigation'
 
 import { AppHeader } from '@/components/layout/AppHeader'
 import { PetMatchSection } from '@/components/matching/PetMatchSection'
+import { ProgressiveQuestionCard } from '@/components/onboarding/ProgressiveQuestionCard'
 import { PetDetailActions } from '@/components/pet/PetDetailActions'
 import { PetGalleryCarousel } from '@/components/pet/PetGalleryCarousel'
 import { formatAge, relativeFromNow, titleCase } from '@/lib/format'
 import { getPetById, getSourceSummaries, summarizeForHeader } from '@/lib/db/pets'
+import type { ProgressiveContext } from '@/lib/onboarding/progressive'
 
 type Props = {
   params: Promise<{ id: string }>
@@ -28,6 +30,19 @@ export default async function PetDetailPage({ params }: Props): Promise<React.Re
   // Server-rendered staleness is per-request, intentionally a function of wall time.
   // eslint-disable-next-line react-hooks/purity
   const isStale = Date.now() - new Date(pet.lastSeenAt).getTime() > STALE_AFTER_MS
+  // Progressive-profiling context derived from the pet on screen.
+  // `special_needs` is the controlled-vocabulary tag the Phase 2.2 LLM
+  // extractor writes when the description signals special-needs care.
+  const progressiveContext: ProgressiveContext = {
+    favoritesCount: 0,
+    viewingPetSpecies: (['dog', 'cat', 'rabbit'] as const).includes(
+      pet.species as 'dog' | 'cat' | 'rabbit',
+    )
+      ? (pet.species as 'dog' | 'cat' | 'rabbit')
+      : 'other',
+    viewingPetIsSpecialNeeds: pet.tags.includes('special_needs'),
+  }
+
   // Always render every standard attribute so the panel layout is consistent
   // across pets — shelters frequently omit fields and we want adopters to see
   // the gap rather than a Details card that silently shrinks.
@@ -75,6 +90,8 @@ export default async function PetDetailPage({ params }: Props): Promise<React.Re
         <PetDetailActions pet={pet} />
 
         <PetMatchSection pet={pet} />
+
+        <ProgressiveQuestionCard context={progressiveContext} />
 
         <section aria-labelledby="about">
           <h2 id="about" className="text-lg font-semibold text-stone-900">
