@@ -34,6 +34,10 @@
     "prev": "Previous photo",
     "next": "Next photo"
   },
+  "possibly_yours": {
+    "title": "Possibly yours",
+    "subtitle": "Today's picks for you"
+  },
   "pet_detail": {
     "verify_on_shelter": "verify on shelter site",
     "listed": "{source} · listed {time}",
