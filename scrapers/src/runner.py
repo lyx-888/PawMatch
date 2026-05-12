@@ -47,7 +47,7 @@ def _registered_sources() -> list[SourceConfig]:
     import importlib
 
     sources: list[SourceConfig] = []
-    for name in ("spca",):
+    for name in ("spca", "sosd", "oscas"):
         try:
             module = importlib.import_module(f"sources.{name}")
         except ImportError:
