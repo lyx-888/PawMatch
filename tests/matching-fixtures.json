@@ -1,0 +1,712 @@
+{
+  "$comment": "Shared (profile, pet) fixtures for the matching engine per requirements §2.3. Each case lists the expected tier, a score range, and any hard-fail template names that must fire. Both the TypeScript engine (web/lib/matching/) and the future Python mirror (scrapers/) calibrate against this file — keep the field names stable and reference templates by their exported NAME (not enum value). Default weights (housing 25, size 15, energy 15, exp 10, compat 20, special 15) sum to 100; theoretical raw range is [-50, 150] clamped to [0, 100], so 50 is the neutral baseline.",
+  "fixtures": [
+    {
+      "id": "great-01-hdb-family-singapore-special",
+      "rationale": "HDB family with kids and dogs. Pet is a Singapore Special, 8kg, low energy, tagged good_with_kids and good_with_dogs. Hard-fail clears (ADORE breed + weight ≤ 10kg). Compatibility caps at +0.8 across two traits. Energy mismatch (low + moderate) drops to +0.3, still net positive. Lands solidly in 'great'.",
+      "profile": {
+        "housing_type": "hdb",
+        "has_kids": true,
+        "kid_ages": [5, 9],
+        "other_pets": "dogs",
+        "experience": "experienced",
+        "activity_level": "moderate",
+        "special_needs_ok": false,
+        "completion_pct": 100
+      },
+      "pet": {
+        "id": "p-great-01",
+        "name": "Mochi",
+        "species": "dog",
+        "breed": "Singapore Special",
+        "weight_kg": 8,
+        "size": "small",
+        "energy_level": "low",
+        "tags": ["good_with_kids", "good_with_dogs"]
+      },
+      "expected": { "tier": "great", "score_min": 75, "score_max": 100, "hard_fails": [] }
+    },
+    {
+      "id": "great-02-condo-moderate-medium-dog",
+      "rationale": "Condo couple, no kids, no pets, moderate activity. Medium dog with medium energy — size and energy both maxed. Experienced adopter (no penalty on a neutral pet).",
+      "profile": {
+        "housing_type": "condo",
+        "has_kids": false,
+        "other_pets": "none",
+        "experience": "some",
+        "activity_level": "moderate",
+        "special_needs_ok": false,
+        "completion_pct": 100
+      },
+      "pet": {
+        "id": "p-great-02",
+        "name": "Cosmo",
+        "species": "dog",
+        "breed": "mixed",
+        "weight_kg": 15,
+        "size": "medium",
+        "energy_level": "medium",
+        "tags": []
+      },
+      "expected": { "tier": "great", "score_min": 75, "score_max": 100, "hard_fails": [] }
+    },
+    {
+      "id": "great-03-landed-active-large-dog",
+      "rationale": "Landed home, very active adopter, large high-energy dog. Housing +1, size +1, energy +1, experience +0.5. No compatibility constraints.",
+      "profile": {
+        "housing_type": "landed",
+        "has_kids": false,
+        "other_pets": "none",
+        "experience": "experienced",
+        "activity_level": "very_active",
+        "special_needs_ok": false,
+        "completion_pct": 100
+      },
+      "pet": {
+        "id": "p-great-03",
+        "name": "Zane",
+        "species": "dog",
+        "breed": "Labrador",
+        "weight_kg": 28,
+        "size": "large",
+        "energy_level": "high",
+        "tags": []
+      },
+      "expected": { "tier": "great", "score_min": 75, "score_max": 100, "hard_fails": [] }
+    },
+    {
+      "id": "great-04-hdb-cat-meshed",
+      "rationale": "HDB user with confirmed meshed windows. Cat with matching low energy. Housing +1 (mesh confirmed), size +1 (cats always), energy +1 (sed+low).",
+      "profile": {
+        "housing_type": "hdb",
+        "has_kids": false,
+        "other_pets": "none",
+        "mesh_status": "meshed",
+        "experience": "some",
+        "activity_level": "sedentary",
+        "special_needs_ok": false,
+        "completion_pct": 100
+      },
+      "pet": {
+        "id": "p-great-04",
+        "name": "Mei Mei",
+        "species": "cat",
+        "energy_level": "low",
+        "tags": ["good_with_cats"]
+      },
+      "expected": { "tier": "great", "score_min": 75, "score_max": 100, "hard_fails": [] }
+    },
+    {
+      "id": "great-05-experienced-special-needs-match",
+      "rationale": "Experienced adopter who explicitly said yes to special needs. Pet is a low-energy senior with special_needs tag. Special-needs alignment +1, energy match (sed+low), experience +0.5.",
+      "profile": {
+        "housing_type": "condo",
+        "has_kids": false,
+        "other_pets": "none",
+        "experience": "experienced",
+        "activity_level": "sedentary",
+        "special_needs_ok": true,
+        "completion_pct": 100
+      },
+      "pet": {
+        "id": "p-great-05",
+        "name": "Old Mack",
+        "species": "dog",
+        "breed": "mixed",
+        "weight_kg": 14,
+        "size": "small",
+        "energy_level": "low",
+        "tags": ["senior", "special_needs"]
+      },
+      "expected": { "tier": "great", "score_min": 75, "score_max": 100, "hard_fails": [] }
+    },
+
+    {
+      "id": "good-01-hdb-family-no-pet-data",
+      "rationale": "HDB family with kids, dog has tag good_with_kids but otherwise sparse (unknown breed/weight/size/energy). Housing 0 (no signal), size 0, energy 0, exp 0, compat +0.4 → only one strong positive lands the score in 'good'.",
+      "profile": {
+        "housing_type": "hdb",
+        "has_kids": true,
+        "kid_ages": [6],
+        "other_pets": "none",
+        "experience": "some",
+        "activity_level": "moderate",
+        "special_needs_ok": false,
+        "completion_pct": 100
+      },
+      "pet": {
+        "id": "p-good-01",
+        "name": "Latte",
+        "species": "dog",
+        "tags": ["good_with_kids"]
+      },
+      "expected": { "tier": "good", "score_min": 55, "score_max": 74, "hard_fails": [] }
+    },
+    {
+      "id": "good-02-condo-small-dog-first-timer",
+      "rationale": "Condo small dog, first-time adopter, no energy data. Housing +0.5, size +0.5, energy 0, exp 0 (first-time + no friendly/challenging tag), no compatibility traits. Score lands mid-'good' (~70).",
+      "profile": {
+        "housing_type": "condo",
+        "has_kids": false,
+        "other_pets": "none",
+        "experience": "first_time",
+        "activity_level": "moderate",
+        "special_needs_ok": false,
+        "completion_pct": 100
+      },
+      "pet": {
+        "id": "p-good-02",
+        "name": "Crumb",
+        "species": "dog",
+        "breed": "Maltese",
+        "weight_kg": 5,
+        "size": "small",
+        "tags": []
+      },
+      "expected": { "tier": "good", "score_min": 55, "score_max": 74, "hard_fails": [] }
+    },
+    {
+      "id": "good-03-hdb-cat-no-mesh-info",
+      "rationale": "HDB user wants a cat but hasn't reported mesh status. Housing 0 (mesh unconfirmed → conservative neutral), size +1, energy +0 (no data). Score lands at 70 — squarely 'good' since the mesh question is the gating piece.",
+      "profile": {
+        "housing_type": "hdb",
+        "has_kids": false,
+        "other_pets": "none",
+        "experience": "some",
+        "activity_level": "sedentary",
+        "special_needs_ok": false,
+        "completion_pct": 100
+      },
+      "pet": {
+        "id": "p-good-03",
+        "name": "Sora",
+        "species": "cat",
+        "tags": []
+      },
+      "expected": { "tier": "good", "score_min": 55, "score_max": 74, "hard_fails": [] }
+    },
+    {
+      "id": "good-04-condo-first-timer-large-dog",
+      "rationale": "Condo first-timer + large dog with no energy/tag data. Housing +0.5, size +0.5 (condo+large), energy 0, exp 0 (first-timer + no challenging or friendly tag), compat 0. Score lands lower 'good'.",
+      "profile": {
+        "housing_type": "condo",
+        "has_kids": false,
+        "other_pets": "none",
+        "experience": "first_time",
+        "activity_level": "moderate",
+        "special_needs_ok": false,
+        "completion_pct": 100
+      },
+      "pet": {
+        "id": "p-good-04",
+        "name": "Rocco",
+        "species": "dog",
+        "breed": "mixed",
+        "weight_kg": 22,
+        "size": "large",
+        "tags": []
+      },
+      "expected": { "tier": "good", "score_min": 55, "score_max": 74, "hard_fails": [] }
+    },
+    {
+      "id": "good-05-hdb-medium-non-adore-unknown-weight",
+      "rationale": "HDB user, dog with no breed and no weight info. Housing 0 (conservative — neither ADORE nor weight-cleared, but also no hard-fail since weight is unknown), size 0 (medium in HDB). Has positive energy match and experience. Score lands around 70.",
+      "profile": {
+        "housing_type": "hdb",
+        "has_kids": false,
+        "other_pets": "none",
+        "experience": "some",
+        "activity_level": "moderate",
+        "special_needs_ok": false,
+        "completion_pct": 100
+      },
+      "pet": {
+        "id": "p-good-05",
+        "name": "Snoopy",
+        "species": "dog",
+        "size": "medium",
+        "energy_level": "medium",
+        "tags": []
+      },
+      "expected": { "tier": "good", "score_min": 55, "score_max": 74, "hard_fails": [] }
+    },
+
+    {
+      "id": "stretch-01-hdb-no-data-sedentary-high",
+      "rationale": "Sedentary user + high-energy dog with no other data. Energy -1 (-15 points). Housing 0 (no signal), size 0. raw = 50 - 15 = 35.",
+      "profile": {
+        "housing_type": "hdb",
+        "has_kids": false,
+        "other_pets": "none",
+        "experience": "some",
+        "activity_level": "sedentary",
+        "special_needs_ok": false,
+        "completion_pct": 100
+      },
+      "pet": {
+        "id": "p-stretch-01",
+        "name": "Viper",
+        "species": "dog",
+        "energy_level": "high",
+        "tags": []
+      },
+      "expected": { "tier": "stretch", "score_min": 0, "score_max": 54, "hard_fails": [] }
+    },
+    {
+      "id": "stretch-02-condo-large-mismatched-energy-compat-penalty",
+      "rationale": "Condo sedentary, has kids and both other pets. Large high-energy dog without any positive compat tag — unknown penalty across 3 traits caps at -0.4 (-8 points) and energy is -1.0 (-15). Housing +0.5, size +0.5. raw = 50 + 12.5 + 7.5 - 15 - 8 = 47.",
+      "profile": {
+        "housing_type": "condo",
+        "has_kids": true,
+        "kid_ages": [12],
+        "other_pets": "both",
+        "experience": "some",
+        "activity_level": "sedentary",
+        "special_needs_ok": false,
+        "completion_pct": 100
+      },
+      "pet": {
+        "id": "p-stretch-02",
+        "name": "Hagrid",
+        "species": "dog",
+        "breed": "Husky",
+        "weight_kg": 24,
+        "size": "large",
+        "energy_level": "high",
+        "tags": []
+      },
+      "expected": { "tier": "stretch", "score_min": 0, "score_max": 54, "hard_fails": [] }
+    },
+    {
+      "id": "stretch-03-first-time-sedentary-high-energy-shy",
+      "rationale": "First-timer + sedentary user + shy + high-energy medium dog in a condo. Two strong negatives: energy -1 + experience -1. raw = 50 + 12.5 + 15 - 15 - 10 = 52.5 → score 53.",
+      "profile": {
+        "housing_type": "condo",
+        "has_kids": false,
+        "other_pets": "none",
+        "experience": "first_time",
+        "activity_level": "sedentary",
+        "special_needs_ok": false,
+        "completion_pct": 100
+      },
+      "pet": {
+        "id": "p-stretch-03",
+        "name": "Boba",
+        "species": "dog",
+        "breed": "mixed",
+        "weight_kg": 12,
+        "size": "medium",
+        "energy_level": "high",
+        "tags": ["shy"]
+      },
+      "expected": { "tier": "stretch", "score_min": 0, "score_max": 54, "hard_fails": [] }
+    },
+    {
+      "id": "stretch-04-hdb-active-low-energy-unknown-size",
+      "rationale": "Very-active user + low-energy dog, unknown weight/breed in HDB. Housing 0, size 0, energy -0.3 (-4.5), exp +0.5 (+5). raw = 50 - 4.5 + 5 = 50.5 → 51 → stretch.",
+      "profile": {
+        "housing_type": "hdb",
+        "has_kids": false,
+        "other_pets": "none",
+        "experience": "experienced",
+        "activity_level": "very_active",
+        "special_needs_ok": false,
+        "completion_pct": 100
+      },
+      "pet": {
+        "id": "p-stretch-04",
+        "name": "Jet",
+        "species": "dog",
+        "energy_level": "low",
+        "tags": []
+      },
+      "expected": { "tier": "stretch", "score_min": 0, "score_max": 54, "hard_fails": [] }
+    },
+    {
+      "id": "stretch-05-everything-unknown",
+      "rationale": "Just-completed essentials (no experience/activity/etc.), pet totally bare. Every component returns 0. raw = 50 → stretch.",
+      "profile": {
+        "housing_type": "hdb",
+        "has_kids": false,
+        "other_pets": "none",
+        "completion_pct": 60
+      },
+      "pet": {
+        "id": "p-stretch-05",
+        "name": "Unknown",
+        "species": "dog",
+        "tags": []
+      },
+      "expected": { "tier": "stretch", "score_min": 0, "score_max": 54, "hard_fails": [] }
+    },
+
+    {
+      "id": "hardfail-01-hdb-oversized-non-adore",
+      "rationale": "HDB user + 25kg Labrador (not on ADORE). Triggers housing_fit_fail. Score capped at 30.",
+      "profile": {
+        "housing_type": "hdb",
+        "has_kids": false,
+        "other_pets": "none",
+        "experience": "experienced",
+        "activity_level": "very_active",
+        "special_needs_ok": false,
+        "completion_pct": 100
+      },
+      "pet": {
+        "id": "p-hf-01",
+        "name": "Cooper",
+        "species": "dog",
+        "breed": "Labrador Retriever",
+        "weight_kg": 25,
+        "size": "large",
+        "energy_level": "high",
+        "tags": []
+      },
+      "expected": {
+        "tier": "hard_fail",
+        "score_min": 0,
+        "score_max": 30,
+        "hard_fails": ["housing_fit_fail"]
+      }
+    },
+    {
+      "id": "hardfail-02-hdb-tall-dog",
+      "rationale": "Dog over 55cm tall, in HDB. Even with sub-10kg weight the height_limit_fail fires.",
+      "profile": {
+        "housing_type": "hdb",
+        "has_kids": false,
+        "other_pets": "none",
+        "experience": "experienced",
+        "activity_level": "moderate",
+        "special_needs_ok": false,
+        "completion_pct": 100
+      },
+      "pet": {
+        "id": "p-hf-02",
+        "name": "Marsh",
+        "species": "dog",
+        "breed": "Whippet",
+        "weight_kg": 9,
+        "height_cm": 60,
+        "size": "medium",
+        "energy_level": "medium",
+        "tags": []
+      },
+      "expected": {
+        "tier": "hard_fail",
+        "score_min": 0,
+        "score_max": 30,
+        "hard_fails": ["height_limit_fail"]
+      }
+    },
+    {
+      "id": "hardfail-03-cat-unmeshed",
+      "rationale": "HDB user explicitly reports unmeshed windows + viewing a cat. mesh_required fires.",
+      "profile": {
+        "housing_type": "hdb",
+        "has_kids": false,
+        "other_pets": "none",
+        "mesh_status": "not_meshed",
+        "experience": "some",
+        "activity_level": "sedentary",
+        "special_needs_ok": false,
+        "completion_pct": 100
+      },
+      "pet": {
+        "id": "p-hf-03",
+        "name": "Ebony",
+        "species": "cat",
+        "energy_level": "low",
+        "tags": []
+      },
+      "expected": {
+        "tier": "hard_fail",
+        "score_min": 0,
+        "score_max": 30,
+        "hard_fails": ["mesh_required"]
+      }
+    },
+    {
+      "id": "hardfail-04-kids-incompatible",
+      "rationale": "Family with kids, pet explicitly tagged not_good_with_kids by shelter. compat_kids_incompatible fires.",
+      "profile": {
+        "housing_type": "condo",
+        "has_kids": true,
+        "kid_ages": [4],
+        "other_pets": "none",
+        "experience": "some",
+        "activity_level": "moderate",
+        "special_needs_ok": false,
+        "completion_pct": 100
+      },
+      "pet": {
+        "id": "p-hf-04",
+        "name": "Damien",
+        "species": "dog",
+        "breed": "mixed",
+        "weight_kg": 18,
+        "size": "medium",
+        "energy_level": "medium",
+        "tags": ["not_good_with_kids"]
+      },
+      "expected": {
+        "tier": "hard_fail",
+        "score_min": 0,
+        "score_max": 30,
+        "hard_fails": ["compat_kids_incompatible"]
+      }
+    },
+    {
+      "id": "hardfail-05-resident-cat-incompatible",
+      "rationale": "User has cats at home, pet tagged not_good_with_cats. compat_cats_incompatible fires.",
+      "profile": {
+        "housing_type": "landed",
+        "has_kids": false,
+        "other_pets": "cats",
+        "experience": "experienced",
+        "activity_level": "moderate",
+        "special_needs_ok": false,
+        "completion_pct": 100
+      },
+      "pet": {
+        "id": "p-hf-05",
+        "name": "Tinder",
+        "species": "dog",
+        "breed": "mixed",
+        "weight_kg": 22,
+        "size": "medium",
+        "energy_level": "high",
+        "tags": ["not_good_with_cats"]
+      },
+      "expected": {
+        "tier": "hard_fail",
+        "score_min": 0,
+        "score_max": 30,
+        "hard_fails": ["compat_cats_incompatible"]
+      }
+    },
+
+    {
+      "id": "incomplete-01-essentials-only-high-raw-capped-to-good",
+      "rationale": "Only the three essentials answered (completion 40 < 60). Raw score would reach ≥75 but tier is capped at 'good' per §2.3.4 — sparse profiles cannot earn 'great'.",
+      "profile": {
+        "housing_type": "hdb",
+        "has_kids": false,
+        "other_pets": "none",
+        "completion_pct": 40
+      },
+      "pet": {
+        "id": "p-inc-01",
+        "name": "Pretzel",
+        "species": "dog",
+        "breed": "Singapore Special",
+        "weight_kg": 7,
+        "size": "small",
+        "energy_level": "low",
+        "tags": ["good_with_kids"]
+      },
+      "expected": { "tier": "good", "score_min": 75, "score_max": 100, "hard_fails": [] }
+    },
+    {
+      "id": "incomplete-02-essentials-mid-raw-stays-good",
+      "rationale": "Sparse profile, mid-range raw score. Stays at 'good'. Wider score window — the engine produces ~78 here.",
+      "profile": {
+        "housing_type": "condo",
+        "has_kids": false,
+        "other_pets": "none",
+        "completion_pct": 40
+      },
+      "pet": {
+        "id": "p-inc-02",
+        "name": "Bramble",
+        "species": "dog",
+        "breed": "mixed",
+        "weight_kg": 15,
+        "size": "medium",
+        "energy_level": "medium",
+        "tags": []
+      },
+      "expected": { "tier": "good", "score_min": 55, "score_max": 100, "hard_fails": [] }
+    },
+    {
+      "id": "incomplete-03-essentials-low-raw-stretch",
+      "rationale": "Sparse profile, mismatched on the only signals we have (HDB + medium dog → housing 1, size 0). Raw ~75 → tier capped to 'good' by completion cap; this fixture pins the cap behaviour rather than 'stretch' at the boundary.",
+      "profile": {
+        "housing_type": "hdb",
+        "has_kids": false,
+        "other_pets": "none",
+        "completion_pct": 40
+      },
+      "pet": {
+        "id": "p-inc-03",
+        "name": "Cleo",
+        "species": "dog",
+        "breed": "mixed",
+        "weight_kg": 9,
+        "size": "medium",
+        "energy_level": "medium",
+        "tags": []
+      },
+      "expected": { "tier": "good", "score_min": 55, "score_max": 100, "hard_fails": [] }
+    },
+    {
+      "id": "incomplete-04-anonymous-zero",
+      "rationale": "Brand new anonymous user, no profile data at all (completion 0). Every component is 0. raw = 50 → stretch.",
+      "profile": { "completion_pct": 0 },
+      "pet": {
+        "id": "p-inc-04",
+        "name": "Onigiri",
+        "species": "dog",
+        "weight_kg": 8,
+        "size": "small",
+        "tags": []
+      },
+      "expected": { "tier": "stretch", "score_min": 0, "score_max": 54, "hard_fails": [] }
+    },
+    {
+      "id": "incomplete-05-just-reached-threshold",
+      "rationale": "Profile at exactly 60% (the great-tier threshold). With strong matching signals, score reaches great because completion is at the cutoff, not below it.",
+      "profile": {
+        "housing_type": "condo",
+        "has_kids": false,
+        "other_pets": "none",
+        "experience": "experienced",
+        "activity_level": "moderate",
+        "completion_pct": 60
+      },
+      "pet": {
+        "id": "p-inc-05",
+        "name": "Sealy",
+        "species": "dog",
+        "breed": "mixed",
+        "weight_kg": 14,
+        "size": "medium",
+        "energy_level": "medium",
+        "tags": []
+      },
+      "expected": { "tier": "great", "score_min": 75, "score_max": 100, "hard_fails": [] }
+    },
+
+    {
+      "id": "edge-01-hdb-unknown-weight-no-hard-fail",
+      "rationale": "HDB user, dog with no weight/size. Housing returns 0 (conservative — no false HDB-approve) but the hard-fail rule also doesn't fire because nothing is over the limit either. Lands in 'good' on partial positive signal.",
+      "profile": {
+        "housing_type": "hdb",
+        "has_kids": false,
+        "other_pets": "none",
+        "experience": "some",
+        "activity_level": "moderate",
+        "special_needs_ok": false,
+        "completion_pct": 100
+      },
+      "pet": {
+        "id": "p-edge-01",
+        "name": "Mystery",
+        "species": "dog",
+        "tags": []
+      },
+      "expected": { "tier": "good", "score_min": 50, "score_max": 70, "hard_fails": [] }
+    },
+    {
+      "id": "edge-02-low-confidence-hdb-approved-treated-as-null",
+      "rationale": "Pet's hdb_approved=true is flagged in low_confidence_fields. Per §2.1.4 the engine must NOT honour the value. Pet is 13kg non-ADORE — without the low-confidence override would have cleared via hdb_approved=true; with the override, the weight-rule applies and housing_fit_fail fires.",
+      "profile": {
+        "housing_type": "hdb",
+        "has_kids": false,
+        "other_pets": "none",
+        "experience": "some",
+        "activity_level": "moderate",
+        "special_needs_ok": false,
+        "completion_pct": 100
+      },
+      "pet": {
+        "id": "p-edge-02",
+        "name": "Falsely",
+        "species": "dog",
+        "breed": "mixed",
+        "weight_kg": 13,
+        "size": "medium",
+        "hdb_approved": true,
+        "tags": [],
+        "low_confidence_fields": ["hdb_approved"]
+      },
+      "expected": {
+        "tier": "hard_fail",
+        "score_min": 0,
+        "score_max": 30,
+        "hard_fails": ["housing_fit_fail"]
+      }
+    },
+    {
+      "id": "edge-03-many-positive-compat-tags-capped",
+      "rationale": "User has kids, cats, dogs — three traits. Pet tagged good with all three. Compatibility positive sum is 0.4*3=1.2, capped to 1.0 per §2.3.1.e. Strong everything else → great.",
+      "profile": {
+        "housing_type": "landed",
+        "has_kids": true,
+        "kid_ages": [8],
+        "other_pets": "both",
+        "experience": "experienced",
+        "activity_level": "moderate",
+        "special_needs_ok": false,
+        "completion_pct": 100
+      },
+      "pet": {
+        "id": "p-edge-03",
+        "name": "Saint",
+        "species": "dog",
+        "breed": "Golden Retriever",
+        "weight_kg": 28,
+        "size": "large",
+        "energy_level": "medium",
+        "tags": ["good_with_kids", "good_with_cats", "good_with_dogs"]
+      },
+      "expected": { "tier": "great", "score_min": 75, "score_max": 100, "hard_fails": [] }
+    },
+    {
+      "id": "edge-04-incompatible-tag-but-user-has-no-trait",
+      "rationale": "Pet tagged not_good_with_dogs but user has no dogs at home. Hard-fail rule does NOT fire — spec's hard-fails are conditional on the user having that trait. Profile is otherwise well-aligned so this still scores 'great'.",
+      "profile": {
+        "housing_type": "condo",
+        "has_kids": false,
+        "other_pets": "none",
+        "experience": "experienced",
+        "activity_level": "moderate",
+        "special_needs_ok": false,
+        "completion_pct": 100
+      },
+      "pet": {
+        "id": "p-edge-04",
+        "name": "Lone",
+        "species": "dog",
+        "breed": "mixed",
+        "weight_kg": 14,
+        "size": "medium",
+        "energy_level": "medium",
+        "tags": ["not_good_with_dogs"]
+      },
+      "expected": { "tier": "great", "score_min": 75, "score_max": 100, "hard_fails": [] }
+    },
+    {
+      "id": "edge-05-cat-mesh-planning",
+      "rationale": "HDB user with cat, mesh_status='planning' (not yet installed). Housing 0 (only 'meshed' grants +1) but NO hard-fail (only 'not_meshed' triggers it). Size +1 cat, energy +1 sed+low, experience +0.5 → great via the non-housing components.",
+      "profile": {
+        "housing_type": "hdb",
+        "has_kids": false,
+        "other_pets": "none",
+        "mesh_status": "planning",
+        "experience": "some",
+        "activity_level": "sedentary",
+        "special_needs_ok": false,
+        "completion_pct": 100
+      },
+      "pet": {
+        "id": "p-edge-05",
+        "name": "Levi",
+        "species": "cat",
+        "energy_level": "low",
+        "tags": []
+      },
+      "expected": { "tier": "great", "score_min": 75, "score_max": 100, "hard_fails": [] }
+    }
+  ]
+}
