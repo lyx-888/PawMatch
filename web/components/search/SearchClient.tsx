@@ -23,12 +23,17 @@ type Filters = {
 
 const EMPTY: Filters = { species: '', size: '', source: '', ageMaxMonths: '' }
 
+// One page of search results. Matches MAX_LIMIT in lib/db/pets; nextCursor on
+// the response tells us when more matches exist beyond what we display.
+const PAGE_SIZE = 100
+
 export function SearchClient({ sources }: Props): React.ReactElement {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [filters, setFilters] = useState<Filters>(() => readFiltersFromUrl(searchParams))
   const [pets, setPets] = useState<Pet[] | null>(null)
   const [count, setCount] = useState<number | null>(null)
+  const [hasMore, setHasMore] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   // Mirror filter state into URL whenever it changes.
@@ -45,12 +50,13 @@ export function SearchClient({ sources }: Props): React.ReactElement {
     const handle = window.setTimeout(async () => {
       try {
         const params = filtersToUrlParams(filters)
-        params.set('limit', '50')
+        params.set('limit', String(PAGE_SIZE))
         const response = await fetch(`/api/pets?${params.toString()}`, { cache: 'no-store' })
         if (!response.ok) throw new Error(`HTTP ${response.status}`)
-        const data = (await response.json()) as { pets: Pet[] }
+        const data = (await response.json()) as { pets: Pet[]; nextCursor: string | null }
         setPets(data.pets)
         setCount(data.pets.length)
+        setHasMore(Boolean(data.nextCursor))
         setError(null)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'failed to load')
@@ -115,7 +121,11 @@ export function SearchClient({ sources }: Props): React.ReactElement {
         />
         <div className="col-span-2 flex items-center justify-between text-xs text-stone-600">
           <p>
-            {count === null ? 'Loading…' : `${count} match${count === 1 ? '' : 'es'}`}
+            {count === null
+              ? 'Loading…'
+              : hasMore
+                ? `Showing first ${count} matches`
+                : `${count} match${count === 1 ? '' : 'es'}`}
             {error && <span className="ml-2 text-rose-600">{error}</span>}
           </p>
           <button
@@ -151,6 +161,15 @@ export function SearchClient({ sources }: Props): React.ReactElement {
                     alt={pet.name}
                     className="absolute inset-0 h-full w-full object-cover"
                     loading="lazy"
+                    // See PetGalleryCarousel: SPCA's CDN selectively 403s on
+                    // Referer, and some URLs are stale duplicates that 404.
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      const img = e.currentTarget
+                      if (!img.src.endsWith('/pet-placeholder.svg')) {
+                        img.src = '/pet-placeholder.svg'
+                      }
+                    }}
                   />
                 </div>
                 <div className="px-1 pb-1">

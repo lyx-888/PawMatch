@@ -35,6 +35,9 @@ export function SwipeStack({ pets, onDecision, onEmpty }: Props): React.ReactEle
     const next = pets[index + 1]
     if (next?.photoUrls[0]) {
       const img = new Image()
+      // Match the rendered <img>'s policy so this preload populates the same
+      // browser cache entry the carousel will read — see PetGalleryCarousel.
+      img.referrerPolicy = 'no-referrer'
       img.src = next.photoUrls[0]
     }
   }, [index, pets])
