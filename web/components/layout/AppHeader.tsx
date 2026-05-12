@@ -5,11 +5,20 @@ import { relativeFromNow } from '@/lib/format'
 
 type Props = {
   totalPets: number
+  // Number of shelters currently contributing pets — not the count of seed
+  // rows in the `shelters` table (Phase 1 only has SPCA wired up; the other
+  // 8 are placeholders for upcoming scrapers).
+  activeShelterCount: number
   lastScrapedAt: string | null
   className?: string
 }
 
-export function AppHeader({ totalPets, lastScrapedAt, className }: Props): React.ReactElement {
+export function AppHeader({
+  totalPets,
+  activeShelterCount,
+  lastScrapedAt,
+  className,
+}: Props): React.ReactElement {
   return (
     <header
       className={cn('flex flex-col gap-2 border-b border-stone-200 bg-white px-4 py-4', className)}
@@ -32,7 +41,8 @@ export function AppHeader({ totalPets, lastScrapedAt, className }: Props): React
       </div>
       <p className="text-xs text-stone-600">
         <span className="font-semibold text-stone-900">{totalPets.toLocaleString('en-SG')}</span>{' '}
-        pets looking for homes across 9 shelters
+        pets looking for homes across {activeShelterCount}{' '}
+        {activeShelterCount === 1 ? 'shelter' : 'shelters'}
         {lastScrapedAt && <> · last updated {relativeFromNow(lastScrapedAt)}</>}
       </p>
     </header>

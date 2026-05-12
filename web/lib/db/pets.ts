@@ -138,6 +138,33 @@ export async function getSourceSummaries(): Promise<SourceSummary[]> {
   }))
 }
 
+export type AppHeaderData = {
+  totalPets: number
+  activeShelterCount: number
+  lastScrapedAt: string | null
+}
+
+/**
+ * Roll up source summaries into the numbers AppHeader actually displays.
+ *
+ * `activeShelterCount` is shelters with at least one available/pending pet —
+ * not the total row count in `shelters`. Phase 1 only has SPCA wired up; the
+ * other 8 rows are placeholder seeds. Showing them in the header makes the
+ * "X pets across N shelters" tally lie about coverage.
+ */
+export function summarizeForHeader(sources: SourceSummary[]): AppHeaderData {
+  return {
+    totalPets: sources.reduce((sum, s) => sum + s.petCount, 0),
+    activeShelterCount: sources.filter((s) => s.petCount > 0).length,
+    lastScrapedAt:
+      sources
+        .map((s) => s.lastScrapedAt)
+        .filter((v): v is string => Boolean(v))
+        .sort()
+        .at(-1) ?? null,
+  }
+}
+
 export type HealthSummary = {
   db: 'ok' | 'down'
   lastScraperRun: {

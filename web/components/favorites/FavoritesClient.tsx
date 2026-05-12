@@ -87,6 +87,15 @@ export function FavoritesClient(): React.ReactElement {
                   alt={pet.name}
                   className="absolute inset-0 h-full w-full object-cover"
                   loading="lazy"
+                  // See PetGalleryCarousel: SPCA's CDN selectively 403s on
+                  // Referer, and some URLs are stale duplicates that 404.
+                  referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    const img = e.currentTarget
+                    if (!img.src.endsWith('/pet-placeholder.svg')) {
+                      img.src = '/pet-placeholder.svg'
+                    }
+                  }}
                 />
                 <span
                   className={cn(
