@@ -29,6 +29,12 @@ logger = logging.getLogger(__name__)
 # switch documented in docs/tasks/README.md ("Disable LLM extraction").
 LLM_DISABLED_ENV = "LLM_DISABLED"
 
+# Implicit-disable env var. When OPENAI_API_KEY is absent the wrapper would
+# raise on its first call; we'd rather log once and skip than spam per-pet
+# tracebacks. Distinct from LLM_DISABLED so explicit-disable still logs a
+# different reason in admin (Phase 5).
+OPENAI_KEY_ENV = "OPENAI_API_KEY"
+
 ScrapeFn = Callable[[], list[PetRecord]]
 
 
@@ -138,6 +144,16 @@ def _enrich_with_llm(client: Client, records: list[PetRecord]) -> int:
 
     if _truthy_env(LLM_DISABLED_ENV):
         logger.info("LLM extraction disabled via %s; skipping enrichment", LLM_DISABLED_ENV)
+        return 0
+    if not os.environ.get(OPENAI_KEY_ENV):
+        # Treat a missing key like the explicit kill switch — log once and
+        # skip the loop. The previous behaviour raised on every pet, which
+        # produced hundreds of identical tracebacks and made real failures
+        # hard to spot.
+        logger.warning(
+            "%s not set; skipping LLM enrichment (pets serve with scraper-only data)",
+            OPENAI_KEY_ENV,
+        )
         return 0
 
     enriched = 0
