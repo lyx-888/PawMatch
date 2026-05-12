@@ -3,6 +3,7 @@
 import { CompleteProfilePrompt } from './CompleteProfilePrompt'
 import { TierBadge } from './TierBadge'
 import { WhyAmISeeingThis } from './WhyAmISeeingThis'
+import { t } from '@/lib/i18n'
 import { useMatchScore } from '@/lib/matching/use-score'
 import { hasAllEssentials, useProfileDraft } from '@/lib/onboarding/profile-draft'
 import type { Pet } from '@/types/pet'
@@ -25,7 +26,7 @@ export function PetMatchSection({ pet }: Props): React.ReactElement | null {
     <section aria-labelledby="match-section" className="flex flex-col gap-2">
       <div className="flex items-center justify-between gap-2">
         <h2 id="match-section" className="text-lg font-semibold text-stone-900">
-          Your match
+          {t('match.section_title')}
         </h2>
         <TierBadge tier={match.tier} />
       </div>

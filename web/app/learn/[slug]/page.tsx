@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 
 import { AppHeader } from '@/components/layout/AppHeader'
 import { getSourceSummaries, summarizeForHeader } from '@/lib/db/pets'
+import { t } from '@/lib/i18n'
 import { SNIPPETS } from '@/lib/readiness/snippets'
 
 type Props = {
@@ -27,7 +28,7 @@ export default async function LearnGuidePage({ params }: Props): Promise<React.R
       <AppHeader {...header} />
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 px-4 py-6">
         <Link href="/learn" className="text-sm text-amber-700 hover:text-amber-800">
-          ← All guides
+          {t('learn.back')}
         </Link>
         <h1 className="text-2xl font-bold tracking-tight text-stone-900">{snippet.title}</h1>
         <p className="text-base text-stone-700">{snippet.summary}</p>
@@ -37,8 +38,7 @@ export default async function LearnGuidePage({ params }: Props): Promise<React.R
           ))}
         </ul>
         <p className="mt-4 rounded-xl bg-stone-100 p-3 text-xs text-stone-600">
-          This guide is a short summary. A longer, more detailed version is in the works for the
-          next release.
+          {t('learn.placeholder')}
         </p>
       </main>
     </div>

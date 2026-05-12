@@ -1,0 +1,255 @@
+{
+  "app": {
+    "brand": "PawMatch",
+    "brand_suffix": "SG"
+  },
+  "nav": {
+    "primary_label": "Primary",
+    "search": "Search",
+    "favorites": "Favorites"
+  },
+  "header": {
+    "pets_looking_one": "{count} pet looking for a home across {shelters} {shelterWord}",
+    "pets_looking_other": "{count} pets looking for homes across {shelters} {shelterWord}",
+    "shelter_singular": "shelter",
+    "shelter_plural": "shelters",
+    "last_updated": "last updated {time}"
+  },
+  "swipe": {
+    "actions_label": "Swipe actions",
+    "pass_aria": "Pass on {name}",
+    "favorite_aria": "Add {name} to favorites",
+    "empty_title": "You've seen everyone here.",
+    "empty_body": "Widen your filters or check back tomorrow — new pets get listed daily.",
+    "cap_warning": "You've hit the 200-favorite anonymous cap. Create an account to keep saving.",
+    "load_error": "Couldn't load pets ({reason}). Check your connection and reload."
+  },
+  "pet_card": {
+    "more_about": "More about {name}",
+    "photo_alt": "{name}, a {species}",
+    "species_fallback": "pet"
+  },
+  "gallery": {
+    "aria": "{alt} photo gallery",
+    "prev": "Previous photo",
+    "next": "Next photo"
+  },
+  "pet_detail": {
+    "verify_on_shelter": "verify on shelter site",
+    "listed": "{source} · listed {time}",
+    "about": "About {name}",
+    "about_empty": "No description provided by the shelter.",
+    "details": "Details",
+    "view_on": "View on {source}",
+    "field": {
+      "species": "Species",
+      "breed": "Breed",
+      "sex": "Sex",
+      "age": "Age",
+      "size": "Size",
+      "hdb_approved": "HDB-approved",
+      "tags": "Tags",
+      "energy": "Energy",
+      "source": "Source",
+      "status": "Status",
+      "match": "Match"
+    },
+    "value": {
+      "unknown": "Unknown",
+      "yes": "Yes",
+      "no": "No",
+      "none": "None",
+      "dash": "—"
+    },
+    "status_aria_prefix": "Status:"
+  },
+  "actions": {
+    "save": "Save",
+    "saved": "Saved",
+    "pass": "Pass",
+    "passed": "Passed",
+    "share": "Share",
+    "copied": "Copied",
+    "save_aria_add": "Save {name} to favorites",
+    "save_aria_remove": "Remove {name} from favorites",
+    "pass_aria": "Pass on {name}",
+    "share_aria": "Share {name}",
+    "share_title": "{name} on {brand}",
+    "share_text": "Look at {name} — available at {source}."
+  },
+  "favorites": {
+    "title": "Your favorites",
+    "subtitle": "Saved on this device. They'll move with you when you create an account.",
+    "loading": "Loading favorites…",
+    "load_error": "Couldn't load favorites: {reason}",
+    "empty": "No favorites yet. Swipe right on the home page, or tap save on a pet's page.",
+    "missing_one": "1 favorite couldn't be loaded — probably adopted or removed from the shelter. They'll vanish from this list next visit.",
+    "missing_other": "{count} favorites couldn't be loaded — probably adopted or removed from the shelter. They'll vanish from this list next visit.",
+    "note_add": "Add a note",
+    "compare_cta": "Compare favorites",
+    "select_prompt": "Tap 2 or 3 pets to compare.",
+    "cancel": "Cancel",
+    "compare": "Compare",
+    "pick_n_to_m": "Pick {min}–{max}",
+    "n_selected": "{count} selected",
+    "n_selected_pick_more": "{count} selected · pick {remaining} more",
+    "select_aria_check": "Select {name} for compare",
+    "select_aria_uncheck": "Deselect {name} for compare"
+  },
+  "compare": {
+    "heading": "Compare favorites",
+    "back": "← Back to favorites",
+    "table_aria": "Pet comparison"
+  },
+  "note": {
+    "label": "Your note",
+    "placeholder": "A reminder about {name}…",
+    "saved": "Saved",
+    "footer": "Saved on this device. Notes move with you when you create an account.",
+    "counter": "{used}/{max}"
+  },
+  "match": {
+    "section_title": "Your match",
+    "tier": {
+      "great": "Great match",
+      "good": "Good match",
+      "stretch": "Stretch",
+      "hard_fail": "Not eligible"
+    },
+    "tier_short": {
+      "great": "Great",
+      "good": "Good",
+      "stretch": "Stretch",
+      "hard_fail": "Not eligible"
+    },
+    "tier_aria": "Match tier: {tier}",
+    "why_show": "Why am I seeing this?",
+    "why_hide": "Hide match breakdown",
+    "score": "Match score: {score} / 100",
+    "complete_profile_prompt": "Complete the three onboarding questions to get a real match score."
+  },
+  "onboarding": {
+    "prompt_heading": "Want smarter matches?",
+    "prompt_body": "Tell us about your home in 60 seconds — we'll surface pets that suit your space.",
+    "prompt_start": "Get started",
+    "prompt_dismiss": "Not now",
+    "form_heading": "Three quick questions",
+    "form_intro": "These power your match score. You can change them anytime.",
+    "form_close_aria": "Close onboarding",
+    "form_save": "Save & continue",
+    "form_done": "Done",
+    "q_housing": "Where do you live?",
+    "q_kids": "Kids in your household?",
+    "q_other_pets": "Other pets at home?",
+    "opt": {
+      "hdb": "HDB",
+      "condo": "Condo",
+      "landed": "Landed",
+      "other": "Other",
+      "yes": "Yes",
+      "no": "No",
+      "none": "None",
+      "cats": "Cats",
+      "dogs": "Dogs",
+      "both": "Both"
+    },
+    "progressive": {
+      "dismiss_aria": "Dismiss question"
+    }
+  },
+  "progressive": {
+    "mesh_status": {
+      "prompt": "Do you have meshed windows? (Required for cat adoption in SG)",
+      "opt": {
+        "meshed": "Yes, meshed",
+        "not_meshed": "Not meshed",
+        "planning": "Planning to"
+      }
+    },
+    "special_needs_ok": {
+      "prompt": "Open to special-needs pets?",
+      "opt": {
+        "yes": "Yes",
+        "no": "Not right now"
+      }
+    },
+    "activity_level": {
+      "prompt": "What activity level fits your lifestyle?",
+      "opt": {
+        "sedentary": "Sedentary",
+        "moderate": "Moderate",
+        "very_active": "Very active"
+      }
+    },
+    "work_pattern": {
+      "prompt": "What does your typical day look like?",
+      "opt": {
+        "wfh": "Work from home",
+        "hybrid": "Hybrid",
+        "office": "Mostly in office",
+        "shift": "Shift work",
+        "other": "Other"
+      }
+    },
+    "experience": {
+      "prompt": "Prior pet experience?",
+      "opt": {
+        "first_time": "First-time",
+        "some": "Some",
+        "experienced": "Lots"
+      }
+    },
+    "budget_tier": {
+      "prompt": "Monthly budget for pet care?",
+      "opt": {
+        "low": "Under S$100",
+        "medium": "S$100–300",
+        "high": "S$300+"
+      }
+    }
+  },
+  "readiness": {
+    "kicker": "Good to know",
+    "dismiss_aria": "Dismiss",
+    "show_details": "Show details",
+    "show_less": "Show less",
+    "more_on_this": "More on this →"
+  },
+  "learn": {
+    "title": "Learn",
+    "intro": "Short guides on what to know before adopting in Singapore. Full deep-dives are coming — for now, each guide is a one-page summary.",
+    "back": "← All guides",
+    "placeholder": "This guide is a short summary. A longer, more detailed version is in the works for the next release."
+  },
+  "search": {
+    "title": "Search",
+    "subtitle": "Filter by species, size, age, or shelter. Tap a pet to see the full profile.",
+    "filters_legend": "Filters",
+    "loading": "Loading…",
+    "showing_first": "Showing first {count} matches",
+    "match_one": "{count} match",
+    "match_other": "{count} matches",
+    "clear": "Clear filters",
+    "empty": "No pets match these filters. Try widening — or come back tomorrow when new pets arrive.",
+    "label": {
+      "species": "Species",
+      "size": "Size",
+      "shelter": "Shelter",
+      "max_age": "Max age"
+    },
+    "opt": {
+      "any": "Any",
+      "dog": "Dog",
+      "cat": "Cat",
+      "rabbit": "Rabbit",
+      "other": "Other",
+      "small": "Small",
+      "medium": "Medium",
+      "large": "Large",
+      "under_6m": "Under 6 mo",
+      "under_1y": "Under 1 yr",
+      "under_3y": "Under 3 yr",
+      "under_7y": "Under 7 yr"
+    }
+  }
+}

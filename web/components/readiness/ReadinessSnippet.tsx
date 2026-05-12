@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useId, useState } from 'react'
 
+import { t } from '@/lib/i18n'
 import { useReadinessSnippet } from '@/lib/readiness/state'
 import type { SnippetContext } from '@/lib/readiness/snippets'
 
@@ -45,7 +46,7 @@ export function ReadinessSnippet({ context, className }: Props): React.ReactElem
       <header className="flex items-start justify-between gap-2">
         <div className="flex flex-col gap-1">
           <p className="text-[10px] font-medium tracking-wide text-amber-700 uppercase">
-            Good to know
+            {t('readiness.kicker')}
           </p>
           <h3 id={titleId} className="text-sm font-semibold text-stone-900">
             {snippet.title}
@@ -54,7 +55,7 @@ export function ReadinessSnippet({ context, className }: Props): React.ReactElem
         <button
           type="button"
           onClick={dismiss}
-          aria-label="Dismiss"
+          aria-label={t('readiness.dismiss_aria')}
           className="-mt-1 -mr-1 rounded-full p-1 text-stone-400 hover:bg-amber-100 hover:text-stone-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
         >
           <span aria-hidden="true">×</span>
@@ -78,13 +79,13 @@ export function ReadinessSnippet({ context, className }: Props): React.ReactElem
           aria-expanded={expanded}
           className="text-xs font-medium text-amber-800 hover:text-amber-900"
         >
-          {expanded ? 'Show less' : 'Show details'}
+          {expanded ? t('readiness.show_less') : t('readiness.show_details')}
         </button>
         <Link
           href={`/learn/${snippet.learnSlug}`}
           className="text-xs font-medium text-amber-800 hover:text-amber-900"
         >
-          More on this →
+          {t('readiness.more_on_this')}
         </Link>
       </div>
     </section>

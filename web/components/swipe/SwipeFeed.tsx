@@ -6,6 +6,7 @@ import { SwipeStack } from './SwipeStack'
 import { OnboardingFlow } from '@/components/onboarding/OnboardingFlow'
 import { ProgressiveQuestionCard } from '@/components/onboarding/ProgressiveQuestionCard'
 import { track } from '@/lib/analytics'
+import { t } from '@/lib/i18n'
 import { getExcludeIds, useFavorites } from '@/lib/local-state'
 import { useShouldShowOnboardingPrompt } from '@/lib/onboarding/state'
 import type { Pet } from '@/types/pet'
@@ -53,7 +54,7 @@ export function SwipeFeed(): React.ReactElement {
   if (error) {
     return (
       <div className="rounded-2xl bg-rose-50 p-4 text-sm text-rose-900">
-        Couldn&apos;t load pets ({error}). Check your connection and reload.
+        {t('swipe.load_error', { reason: error })}
       </div>
     )
   }

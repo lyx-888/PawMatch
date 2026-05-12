@@ -1,6 +1,7 @@
 'use client'
 
 import { cn } from '@/lib/cn'
+import { t } from '@/lib/i18n'
 
 type Props = {
   onStart: () => void
@@ -23,25 +24,23 @@ export function OnboardingPrompt({ onStart, onDismiss, className }: Props): Reac
       )}
     >
       <h2 id="onboarding-prompt-heading" className="text-sm font-semibold">
-        Want smarter matches?
+        {t('onboarding.prompt_heading')}
       </h2>
-      <p className="mt-1 text-sm text-stone-700">
-        Tell us about your home in 60 seconds — we&apos;ll surface pets that suit your space.
-      </p>
+      <p className="mt-1 text-sm text-stone-700">{t('onboarding.prompt_body')}</p>
       <div className="mt-3 flex items-center gap-2">
         <button
           type="button"
           onClick={onStart}
           className="rounded-full bg-amber-600 px-4 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700"
         >
-          Get started
+          {t('onboarding.prompt_start')}
         </button>
         <button
           type="button"
           onClick={onDismiss}
           className="rounded-full px-3 py-1.5 text-sm font-medium text-stone-600 transition hover:text-stone-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-400"
         >
-          Not now
+          {t('onboarding.prompt_dismiss')}
         </button>
       </div>
     </div>

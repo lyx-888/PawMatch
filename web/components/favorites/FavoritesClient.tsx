@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import { FavoriteNote } from './FavoriteNote'
 import { cn } from '@/lib/cn'
 import { formatAge, titleCase } from '@/lib/format'
+import { t } from '@/lib/i18n'
 import { useFavorites, useFavoriteNote } from '@/lib/local-state'
 import type { Pet } from '@/types/pet'
 
@@ -49,19 +50,21 @@ export function FavoritesClient(): React.ReactElement {
   }, [favorites.ids])
 
   if (state.kind === 'loading') {
-    return <p className="text-sm text-stone-600">Loading favorites…</p>
+    return <p className="text-sm text-stone-600">{t('favorites.loading')}</p>
   }
 
   if (state.kind === 'error') {
-    return <p className="text-sm text-rose-600">Couldn&apos;t load favorites: {state.message}</p>
+    return (
+      <p className="text-sm text-rose-600">
+        {t('favorites.load_error', { reason: state.message })}
+      </p>
+    )
   }
 
   if (state.kind === 'empty') {
     return (
       <div className="rounded-2xl border-2 border-dashed border-stone-200 bg-white p-6 text-center">
-        <p className="text-sm text-stone-700">
-          No favorites yet. Swipe right on the home page, or tap save on a pet&apos;s page.
-        </p>
+        <p className="text-sm text-stone-700">{t('favorites.empty')}</p>
       </div>
     )
   }
@@ -70,9 +73,9 @@ export function FavoritesClient(): React.ReactElement {
     <div className="flex flex-col gap-3">
       {state.missingIds.length > 0 && (
         <p className="text-xs text-amber-700">
-          {state.missingIds.length} favorite{state.missingIds.length === 1 ? '' : 's'} couldn&apos;t
-          be loaded — probably adopted or removed from the shelter. They&apos;ll vanish from this
-          list next visit.
+          {t(state.missingIds.length === 1 ? 'favorites.missing_one' : 'favorites.missing_other', {
+            count: state.missingIds.length,
+          })}
         </p>
       )}
       <ul className="grid grid-cols-2 gap-3" role="list">
@@ -154,7 +157,7 @@ function FavoriteCard({
         className="flex items-center justify-between gap-2 rounded-xl border border-stone-200 bg-white px-3 py-2 text-left text-xs text-stone-700 transition hover:bg-stone-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
       >
         <span className={cn('truncate', !hasNote && 'text-stone-500')}>
-          {hasNote ? note : 'Add a note'}
+          {hasNote ? note : t('favorites.note_add')}
         </span>
         <span aria-hidden="true" className="shrink-0 text-stone-400">
           {noteOpen ? '−' : '+'}
