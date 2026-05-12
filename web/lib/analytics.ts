@@ -41,6 +41,12 @@ export type AnalyticsEvent =
   | 'onboarding_completed'
   | 'onboarding_dismissed'
   | 'onboarding_form_closed'
+  // Phase 2.5 progressive profiling. Each question is one-shot, so the
+  // shown/dismissed/answered triple lets us see per-question completion
+  // rates without ambiguity.
+  | 'progressive_question_shown'
+  | 'progressive_question_dismissed'
+  | 'progressive_question_answered'
 
 export function track(event: AnalyticsEvent, properties: Record<string, unknown> = {}): void {
   if (!ensureInit()) return
