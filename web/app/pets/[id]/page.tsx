@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 
 import { AppHeader } from '@/components/layout/AppHeader'
+import { FavoriteNote } from '@/components/favorites/FavoriteNote'
 import { PetMatchSection } from '@/components/matching/PetMatchSection'
 import { ProgressiveQuestionCard } from '@/components/onboarding/ProgressiveQuestionCard'
 import { PetDetailActions } from '@/components/pet/PetDetailActions'
@@ -88,6 +89,8 @@ export default async function PetDetailPage({ params }: Props): Promise<React.Re
         </section>
 
         <PetDetailActions pet={pet} />
+
+        <FavoriteNote petId={pet.id} petName={pet.name} />
 
         <PetMatchSection pet={pet} />
 
