@@ -26,6 +26,11 @@ jobs:
       PYTHONPATH: src
       SUPABASE_URL: ${{ secrets.SCRAPER_SUPABASE_URL }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SCRAPER_SUPABASE_SERVICE_ROLE_KEY }}
+      # Optional. When absent, the runner skips the LLM-enrichment pass
+      # entirely (logged once) and pets serve with scraper-only data —
+      # better than the previous behaviour where every pet's extraction
+      # threw a per-pet exception.
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
     steps:
       - uses: actions/checkout@v4
 
@@ -48,6 +53,9 @@ jobs:
             exit 1
           fi
           echo "supabase target host: $(echo "$SUPABASE_URL" | sed -E 's#https?://([^/]+).*#\1#')"
+          if [ -z "${OPENAI_API_KEY:-}" ]; then
+            echo "::warning::OPENAI_API_KEY not set; LLM extraction will be skipped this run."
+          fi
 
       - name: Run scrapers
         run: uv run python -m runner
