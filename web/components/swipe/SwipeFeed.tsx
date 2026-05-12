@@ -4,8 +4,9 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { SwipeStack } from './SwipeStack'
 import { OnboardingFlow } from '@/components/onboarding/OnboardingFlow'
+import { ProgressiveQuestionCard } from '@/components/onboarding/ProgressiveQuestionCard'
 import { track } from '@/lib/analytics'
-import { getExcludeIds } from '@/lib/local-state'
+import { getExcludeIds, useFavorites } from '@/lib/local-state'
 import { useShouldShowOnboardingPrompt } from '@/lib/onboarding/state'
 import type { Pet } from '@/types/pet'
 
@@ -22,6 +23,10 @@ export function SwipeFeed(): React.ReactElement {
   // keeps the close instantaneous.
   const [onboardingClosed, setOnboardingClosed] = useState(false)
   const shouldShowOnboarding = useShouldShowOnboardingPrompt(swipesThisSession) && !onboardingClosed
+  // Progressive triggers on the swipe feed look at the favorites count
+  // (first / third favorite). Pet-detail-specific triggers like the cat
+  // mesh question live on the pet detail page where the species context is.
+  const { count: favoritesCount } = useFavorites()
 
   const load = useCallback(async () => {
     try {
@@ -60,6 +65,10 @@ export function SwipeFeed(): React.ReactElement {
   return (
     <div className="flex flex-col gap-4">
       <OnboardingFlow open={shouldShowOnboarding} onClose={() => setOnboardingClosed(true)} />
+      {/* Hide while the onboarding prompt is occupying the same slot —
+          stacking two amber cards would be visual noise and only the
+          first-favorite trigger would be eligible anyway. */}
+      {!shouldShowOnboarding && <ProgressiveQuestionCard context={{ favoritesCount }} />}
       <SwipeStack
         pets={pets}
         onDecision={(decision, pet) => {
