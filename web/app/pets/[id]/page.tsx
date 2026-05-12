@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 
 import { AppHeader } from '@/components/layout/AppHeader'
+import { PetMatchSection } from '@/components/matching/PetMatchSection'
 import { PetDetailActions } from '@/components/pet/PetDetailActions'
 import { PetGalleryCarousel } from '@/components/pet/PetGalleryCarousel'
 import { formatAge, relativeFromNow, titleCase } from '@/lib/format'
@@ -72,6 +73,8 @@ export default async function PetDetailPage({ params }: Props): Promise<React.Re
         </section>
 
         <PetDetailActions pet={pet} />
+
+        <PetMatchSection pet={pet} />
 
         <section aria-labelledby="about">
           <h2 id="about" className="text-lg font-semibold text-stone-900">
