@@ -1,4 +1,5 @@
 import { inngest } from './client'
+import { generateDailyPicks } from './picks'
 import { recomputeForPet, recomputeForUser } from './recompute'
 import { createServerClient } from '@/lib/db/client'
 
@@ -85,6 +86,21 @@ export const drainQueueFn = inngest.createFunction(
     })
 
     return { fanned_out: claimed.length }
+  },
+)
+
+// Possibly Yours daily picks per spec §2.4. Runs at 22:00 UTC = 06:00 SGT
+// (Singapore is UTC+8 year-round, no DST). Generates 5-pet picks for every
+// user active in the last 14 days; inactive users are skipped so we stay
+// comfortably under the Inngest free-tier event budget.
+export const generateDailyPicksFn = inngest.createFunction(
+  {
+    id: 'picks-generate-daily',
+    name: 'Possibly Yours — generate daily picks',
+    triggers: [{ cron: '0 22 * * *' }],
+  },
+  async ({ step }) => {
+    return step.run('generate', () => generateDailyPicks())
   },
 )
 
