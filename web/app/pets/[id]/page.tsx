@@ -33,18 +33,21 @@ export default async function PetDetailPage({ params }: Props): Promise<React.Re
   // Server-rendered staleness is per-request, intentionally a function of wall time.
   // eslint-disable-next-line react-hooks/purity
   const isStale = Date.now() - new Date(pet.lastSeenAt).getTime() > STALE_AFTER_MS
-  const attributes: Array<{ label: string; value: string | null }> = [
-    { label: 'Species', value: titleCase(pet.species) },
-    { label: 'Breed', value: pet.breed },
-    { label: 'Sex', value: titleCase(pet.sex) },
-    { label: 'Age', value: formatAge(pet.ageMonths) },
-    { label: 'Size', value: titleCase(pet.size) },
+  // Always render every standard attribute so the panel layout is consistent
+  // across pets — shelters frequently omit fields and we want adopters to see
+  // the gap rather than a Details card that silently shrinks.
+  const attributes: Array<{ label: string; value: string }> = [
+    { label: 'Species', value: titleCase(pet.species) ?? 'Unknown' },
+    { label: 'Breed', value: pet.breed ?? 'Unknown' },
+    { label: 'Sex', value: titleCase(pet.sex) ?? 'Unknown' },
+    { label: 'Age', value: formatAge(pet.ageMonths) ?? 'Unknown' },
+    { label: 'Size', value: titleCase(pet.size) ?? 'Unknown' },
     {
       label: 'HDB-approved',
-      value: pet.hdbApproved === null ? null : pet.hdbApproved ? 'Yes' : 'Not confirmed',
+      value: pet.hdbApproved === null ? 'Unknown' : pet.hdbApproved ? 'Yes' : 'No',
     },
-    { label: 'Tags', value: pet.tags.length > 0 ? pet.tags.join(', ') : null },
-  ].filter((row) => row.value !== null) as Array<{ label: string; value: string }>
+    { label: 'Tags', value: pet.tags.length > 0 ? pet.tags.join(', ') : 'None' },
+  ]
 
   return (
     <div className="flex min-h-full flex-col bg-stone-50">
