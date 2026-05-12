@@ -6,6 +6,7 @@ import { PetMatchSection } from '@/components/matching/PetMatchSection'
 import { ProgressiveQuestionCard } from '@/components/onboarding/ProgressiveQuestionCard'
 import { PetDetailActions } from '@/components/pet/PetDetailActions'
 import { PetGalleryCarousel } from '@/components/pet/PetGalleryCarousel'
+import { PetReadinessSnippet } from '@/components/readiness/PetReadinessSnippet'
 import { formatAge, relativeFromNow, titleCase } from '@/lib/format'
 import { getPetById, getSourceSummaries, summarizeForHeader } from '@/lib/db/pets'
 import type { ProgressiveContext } from '@/lib/onboarding/progressive'
@@ -93,6 +94,8 @@ export default async function PetDetailPage({ params }: Props): Promise<React.Re
         <FavoriteNote petId={pet.id} petName={pet.name} />
 
         <PetMatchSection pet={pet} />
+
+        <PetReadinessSnippet pet={pet} />
 
         <ProgressiveQuestionCard context={progressiveContext} />
 
