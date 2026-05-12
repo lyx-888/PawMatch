@@ -3,8 +3,10 @@
 import { useCallback, useEffect, useState } from 'react'
 
 import { SwipeStack } from './SwipeStack'
+import { OnboardingFlow } from '@/components/onboarding/OnboardingFlow'
 import { track } from '@/lib/analytics'
 import { getExcludeIds } from '@/lib/local-state'
+import { useShouldShowOnboardingPrompt } from '@/lib/onboarding/state'
 import type { Pet } from '@/types/pet'
 
 const PAGE_SIZE = 30
@@ -14,6 +16,12 @@ export function SwipeFeed(): React.ReactElement {
   const [error, setError] = useState<string | null>(null)
   const [swipesThisSession, setSwipesThisSession] = useState(0)
   const [fiveCompleteFired, setFiveCompleteFired] = useState(false)
+  // Onboarding is dismissable from within the flow — once the user closes
+  // it we don't want to immediately re-show it from the prompt hook (the
+  // hook reads localStorage which the form updates async). Local override
+  // keeps the close instantaneous.
+  const [onboardingClosed, setOnboardingClosed] = useState(false)
+  const shouldShowOnboarding = useShouldShowOnboardingPrompt(swipesThisSession) && !onboardingClosed
 
   const load = useCallback(async () => {
     try {
@@ -50,26 +58,29 @@ export function SwipeFeed(): React.ReactElement {
   }
 
   return (
-    <SwipeStack
-      pets={pets}
-      onDecision={(decision, pet) => {
-        track(decision === 'favorite' ? 'pet_favorited' : 'pet_passed', {
-          pet_id: pet.id,
-          source: pet.source,
-        })
-        track('pet_viewed', { pet_id: pet.id, source: pet.source })
-        const nextCount = swipesThisSession + 1
-        setSwipesThisSession(nextCount)
-        if (nextCount === 5 && !fiveCompleteFired) {
-          track('swipe_5_complete')
-          setFiveCompleteFired(true)
-        }
-      }}
-      onEmpty={() => {
-        // Re-fetch in case the user has swiped through every loaded pet.
-        load()
-      }}
-    />
+    <div className="flex flex-col gap-4">
+      <OnboardingFlow open={shouldShowOnboarding} onClose={() => setOnboardingClosed(true)} />
+      <SwipeStack
+        pets={pets}
+        onDecision={(decision, pet) => {
+          track(decision === 'favorite' ? 'pet_favorited' : 'pet_passed', {
+            pet_id: pet.id,
+            source: pet.source,
+          })
+          track('pet_viewed', { pet_id: pet.id, source: pet.source })
+          const nextCount = swipesThisSession + 1
+          setSwipesThisSession(nextCount)
+          if (nextCount === 5 && !fiveCompleteFired) {
+            track('swipe_5_complete')
+            setFiveCompleteFired(true)
+          }
+        }}
+        onEmpty={() => {
+          // Re-fetch in case the user has swiped through every loaded pet.
+          load()
+        }}
+      />
+    </div>
   )
 }
 
