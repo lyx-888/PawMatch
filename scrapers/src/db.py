@@ -1,8 +1,9 @@
-"""Supabase client + the three write operations every scraper run needs.
+"""Supabase client + the write operations every scraper run needs.
 
 `upsert_pet` is the per-record write. `mark_gone` and `record_run` are
-end-of-run bookkeeping. Keep this module narrow: no scraping, no parsing — only
-talking to Postgres.
+end-of-run bookkeeping. `apply_extraction` writes LLM-extracted fields onto a
+pet row without overwriting anything the scraper found directly. Keep this
+module narrow: no scraping, no parsing — only talking to Postgres.
 """
 
 from __future__ import annotations
@@ -14,6 +15,7 @@ from typing import Any
 from supabase import Client, create_client
 
 from base import PetRecord
+from extraction import ExtractionResult
 
 GRACE_PERIOD_DAYS = 3
 
@@ -159,3 +161,105 @@ def record_run(
         return 0
     row_id: Any = rows[0]["id"] if isinstance(rows[0], dict) else 0
     return int(row_id)
+
+
+# --- Extraction write-back ------------------------------------------------
+
+# Only these LLM fields are eligible to land on a pets row. Tags are merged
+# instead of replaced (see `apply_extraction`) so the scraper's free-text
+# tags survive alongside the controlled-vocab ones.
+_EXTRACTABLE_COLUMNS = ("hdb_approved", "size", "age_months", "energy_level")
+
+
+def apply_extraction(
+    client: Client,
+    source: str,
+    source_id: str,
+    *,
+    result: ExtractionResult,
+) -> bool:
+    """Merge an LLM extraction onto an existing pets row.
+
+    Conservative-bias rules:
+
+    * Scraper-provided values win — we only fill columns where the current
+      value is `null`. Shelter-structured data (e.g. SOSD's HDB field) is
+      ground truth, not the LLM's guess.
+    * Tags are merged, not replaced. The LLM's controlled-vocab tags are
+      appended to whatever the scraper already wrote, deduped while
+      preserving the scraper's original order.
+    * `low_confidence_fields` is recorded only for columns we actually
+      ended up writing from the LLM. If the scraper already filled
+      `hdb_approved`, its confidence is irrelevant — we didn't use it.
+
+    Returns `True` if at least one column was updated.
+    """
+
+    response = (
+        client.table("pets")
+        .select("id, hdb_approved, size, age_months, energy_level, tags, low_confidence_fields")
+        .eq("source", source)
+        .eq("source_id", source_id)
+        .maybe_single()
+        .execute()
+    )
+    row: dict[str, Any] | None = getattr(response, "data", None)
+    if row is None:
+        return False
+
+    attrs = result.attributes
+    update: dict[str, Any] = {}
+    written_columns: list[str] = []
+
+    extracted_values: dict[str, Any] = {
+        "hdb_approved": attrs.hdb_approved,
+        "size": attrs.size,
+        "age_months": attrs.age_months,
+        "energy_level": attrs.energy_level,
+    }
+    for column in _EXTRACTABLE_COLUMNS:
+        if row.get(column) is not None:
+            continue  # scraper already supplied this — leave it alone
+        value = extracted_values[column]
+        if value is None:
+            continue  # LLM couldn't fill it either
+        update[column] = value
+        written_columns.append(column)
+
+    merged_tags = _merge_tags(row.get("tags") or [], attrs.tags)
+    if merged_tags != (row.get("tags") or []):
+        update["tags"] = merged_tags
+        if attrs.tags:
+            written_columns.append("tags")
+
+    if not update:
+        return False
+
+    # Replace the existing low_confidence_fields array entirely with the
+    # columns we just wrote from the LLM. Anything the scraper provided
+    # stays out of the array — it's not low-confidence by construction.
+    update["low_confidence_fields"] = sorted(
+        set(written_columns) & set(result.low_confidence_fields)
+    )
+
+    client.table("pets").update(update).eq("id", row["id"]).execute()
+    return True
+
+
+def _merge_tags(existing: list[str], new: list[str]) -> list[str]:
+    """Append `new` to `existing`, deduped, preserving first-seen order.
+
+    Scraper-provided tags (free-text, e.g. "Senior, Shy & Skittish") come
+    first; LLM controlled-vocab tags (e.g. "senior", "shy") come after.
+    The two vocabularies don't collide in practice because the LLM tags
+    are snake_case and the scraper tags are usually title-cased English.
+    """
+
+    seen: set[str] = set()
+    out: list[str] = []
+    for tag in [*existing, *new]:
+        if tag in seen:
+            continue
+        seen.add(tag)
+        out.append(tag)
+    return out
