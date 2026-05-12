@@ -2,21 +2,32 @@
 
 Each registered source must expose a `scrape() -> list[PetRecord]` function.
 The runner calls them one at a time, isolating failures: one shelter blowing
-up never blocks another. Per-run bookkeeping goes to `scraper_runs` so the
-health endpoint can read off latest status.
+up never blocks another. After every successful scrape the LLM extractor
+(Phase 2.2) enriches each pet's row with structured attributes derived from
+the description. Per-run bookkeeping goes to `scraper_runs` so the health
+endpoint can read off latest status.
 """
 
 from __future__ import annotations
 
 import logging
+import os
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 
+from supabase import Client
+
 from base import PetRecord
-from db import get_db_client, mark_gone, record_run, upsert_pets
+from db import apply_extraction, get_db_client, mark_gone, record_run, upsert_pets
+from extraction import extract_attributes
 
 logger = logging.getLogger(__name__)
+
+# Setting this env var to a truthy value bypasses the LLM enrichment pass —
+# useful for local runs that don't have an OpenAI key, and as the kill
+# switch documented in docs/tasks/README.md ("Disable LLM extraction").
+LLM_DISABLED_ENV = "LLM_DISABLED"
 
 ScrapeFn = Callable[[], list[PetRecord]]
 
@@ -87,6 +98,8 @@ def run_source(config: SourceConfig) -> RunSummary:
     seen_ids = [r.source_id for r in records]
     marked_gone = mark_gone(client, config.name, seen_ids)
 
+    enriched = _enrich_with_llm(client, records)
+
     record_run(
         client,
         config.name,
@@ -98,13 +111,73 @@ def run_source(config: SourceConfig) -> RunSummary:
         finished_at=datetime.now(UTC),
     )
     logger.info(
-        "scraper %s ok: found=%d written=%d marked_gone=%d",
-        config.name, len(records), written, marked_gone,
+        "scraper %s ok: found=%d written=%d marked_gone=%d enriched=%d",
+        config.name, len(records), written, marked_gone, enriched,
     )
     return RunSummary(
         source=config.name, status="success", pets_found=len(records),
         pets_marked_gone=marked_gone, error=None,
     )
+
+
+def _enrich_with_llm(client: Client, records: list[PetRecord]) -> int:
+    """Run the LLM extractor over each record and write back the result.
+
+    Skipping conditions, each logged so admin (Phase 5) can spot patterns:
+
+    * Pet has no description → nothing to read.
+    * Daily $2 cap reached → `extract_attributes` returns None and we stop
+      enriching the rest of this run (subsequent calls would also short-
+      circuit at the cap check). Existing rows continue serving their
+      previous extraction.
+    * One pet's call raises → log + skip just that pet, keep going.
+
+    The `LLM_DISABLED=1` env var bypasses the whole pass — the kill switch
+    listed in docs/tasks/README.md.
+    """
+
+    if _truthy_env(LLM_DISABLED_ENV):
+        logger.info("LLM extraction disabled via %s; skipping enrichment", LLM_DISABLED_ENV)
+        return 0
+
+    enriched = 0
+    for record in records:
+        if not record.description:
+            continue
+        try:
+            result = extract_attributes(record.description, db_client=client)
+        except Exception:  # noqa: BLE001 — per-pet isolation
+            logger.exception(
+                "extraction failed for %s/%s; pet still serves with scraper data",
+                record.source, record.source_id,
+            )
+            continue
+        if result is None:
+            # Either cap reached or empty description. Once the cap is hit
+            # every subsequent call will short-circuit too, so it's fine
+            # to keep looping — the cost check inside the wrapper is cheap.
+            continue
+        try:
+            if apply_extraction(
+                client,
+                record.source,
+                record.source_id,
+                result=result,
+            ):
+                enriched += 1
+        except Exception:  # noqa: BLE001 — per-pet isolation
+            logger.exception(
+                "apply_extraction failed for %s/%s",
+                record.source, record.source_id,
+            )
+    return enriched
+
+
+def _truthy_env(name: str) -> bool:
+    """`'1' / 'true' / 'yes'` (case-insensitive) → True; anything else → False."""
+
+    value = os.environ.get(name, "").strip().lower()
+    return value in {"1", "true", "yes", "on"}
 
 
 def main() -> int:
