@@ -3,9 +3,10 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
+import { FavoriteNote } from './FavoriteNote'
 import { cn } from '@/lib/cn'
 import { formatAge, titleCase } from '@/lib/format'
-import { useFavorites } from '@/lib/local-state'
+import { useFavorites, useFavoriteNote } from '@/lib/local-state'
 import type { Pet } from '@/types/pet'
 
 type State =
@@ -17,6 +18,7 @@ type State =
 export function FavoritesClient(): React.ReactElement {
   const favorites = useFavorites()
   const [state, setState] = useState<State>({ kind: 'loading' })
+  const [openNoteId, setOpenNoteId] = useState<string | null>(null)
 
   useEffect(() => {
     if (favorites.ids.length === 0) {
@@ -75,53 +77,91 @@ export function FavoritesClient(): React.ReactElement {
       )}
       <ul className="grid grid-cols-2 gap-3" role="list">
         {state.pets.map((pet) => (
-          <li key={pet.id}>
-            <Link
-              href={`/pets/${pet.id}`}
-              className="group flex flex-col gap-2 rounded-2xl bg-white p-2 shadow-sm ring-1 ring-stone-200 transition hover:ring-amber-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
-            >
-              <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl bg-stone-100">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={pet.photoUrls[0] ?? '/pet-placeholder.svg'}
-                  alt={pet.name}
-                  className="absolute inset-0 h-full w-full object-cover"
-                  loading="lazy"
-                  // See PetGalleryCarousel: SPCA's CDN selectively 403s on
-                  // Referer, and some URLs are stale duplicates that 404.
-                  referrerPolicy="no-referrer"
-                  onError={(e) => {
-                    const img = e.currentTarget
-                    if (!img.src.endsWith('/pet-placeholder.svg')) {
-                      img.src = '/pet-placeholder.svg'
-                    }
-                  }}
-                />
-                <span
-                  className={cn(
-                    'absolute top-2 right-2 rounded-full px-2 py-0.5 text-[10px] font-medium tracking-wide uppercase',
-                    pet.status === 'available'
-                      ? 'bg-emerald-100/90 text-emerald-800'
-                      : pet.status === 'pending'
-                        ? 'bg-amber-100/90 text-amber-900'
-                        : 'bg-stone-200/90 text-stone-700',
-                  )}
-                >
-                  {pet.status}
-                </span>
-              </div>
-              <div className="px-1 pb-1">
-                <p className="text-sm font-semibold text-stone-900">{pet.name}</p>
-                <p className="text-xs text-stone-600">
-                  {[titleCase(pet.species), pet.breed, formatAge(pet.ageMonths)]
-                    .filter(Boolean)
-                    .join(' · ')}
-                </p>
-              </div>
-            </Link>
-          </li>
+          <FavoriteCard
+            key={pet.id}
+            pet={pet}
+            noteOpen={openNoteId === pet.id}
+            onToggleNote={() => setOpenNoteId((id) => (id === pet.id ? null : pet.id))}
+          />
         ))}
       </ul>
     </div>
+  )
+}
+
+function FavoriteCard({
+  pet,
+  noteOpen,
+  onToggleNote,
+}: {
+  pet: Pet
+  noteOpen: boolean
+  onToggleNote: () => void
+}): React.ReactElement {
+  const { note } = useFavoriteNote(pet.id)
+  const hasNote = note.trim().length > 0
+
+  return (
+    <li className="flex flex-col gap-2">
+      <Link
+        href={`/pets/${pet.id}`}
+        className="group flex flex-col gap-2 rounded-2xl bg-white p-2 shadow-sm ring-1 ring-stone-200 transition hover:ring-amber-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+      >
+        <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl bg-stone-100">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={pet.photoUrls[0] ?? '/pet-placeholder.svg'}
+            alt={pet.name}
+            className="absolute inset-0 h-full w-full object-cover"
+            loading="lazy"
+            // See PetGalleryCarousel: SPCA's CDN selectively 403s on
+            // Referer, and some URLs are stale duplicates that 404.
+            referrerPolicy="no-referrer"
+            onError={(e) => {
+              const img = e.currentTarget
+              if (!img.src.endsWith('/pet-placeholder.svg')) {
+                img.src = '/pet-placeholder.svg'
+              }
+            }}
+          />
+          <span
+            className={cn(
+              'absolute top-2 right-2 rounded-full px-2 py-0.5 text-[10px] font-medium tracking-wide uppercase',
+              pet.status === 'available'
+                ? 'bg-emerald-100/90 text-emerald-800'
+                : pet.status === 'pending'
+                  ? 'bg-amber-100/90 text-amber-900'
+                  : 'bg-stone-200/90 text-stone-700',
+            )}
+          >
+            {pet.status}
+          </span>
+        </div>
+        <div className="px-1 pb-1">
+          <p className="text-sm font-semibold text-stone-900">{pet.name}</p>
+          <p className="text-xs text-stone-600">
+            {[titleCase(pet.species), pet.breed, formatAge(pet.ageMonths)]
+              .filter(Boolean)
+              .join(' · ')}
+          </p>
+        </div>
+      </Link>
+
+      <button
+        type="button"
+        onClick={onToggleNote}
+        aria-expanded={noteOpen}
+        className="flex items-center justify-between gap-2 rounded-xl border border-stone-200 bg-white px-3 py-2 text-left text-xs text-stone-700 transition hover:bg-stone-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+      >
+        <span className={cn('truncate', !hasNote && 'text-stone-500')}>
+          {hasNote ? note : 'Add a note'}
+        </span>
+        <span aria-hidden="true" className="shrink-0 text-stone-400">
+          {noteOpen ? '−' : '+'}
+        </span>
+      </button>
+
+      {noteOpen && <FavoriteNote petId={pet.id} petName={pet.name} requireFavorited={false} />}
+    </li>
   )
 }
