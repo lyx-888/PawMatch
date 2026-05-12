@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 
 import { AppHeader } from '@/components/layout/AppHeader'
+import { PetMatchSection } from '@/components/matching/PetMatchSection'
 import { ProgressiveQuestionCard } from '@/components/onboarding/ProgressiveQuestionCard'
 import { PetDetailActions } from '@/components/pet/PetDetailActions'
 import { PetGalleryCarousel } from '@/components/pet/PetGalleryCarousel'
@@ -87,6 +88,8 @@ export default async function PetDetailPage({ params }: Props): Promise<React.Re
         </section>
 
         <PetDetailActions pet={pet} />
+
+        <PetMatchSection pet={pet} />
 
         <ProgressiveQuestionCard context={progressiveContext} />
 
