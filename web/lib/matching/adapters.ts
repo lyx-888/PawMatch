@@ -61,3 +61,38 @@ export function profileDraftToMatchProfile(draft: ProfileDraft): MatchProfile {
     completion_pct: computeCompletionPct(draft),
   }
 }
+
+// Minimal shape of a `profiles` row used by the matching engine. Keeping it
+// local rather than importing `Profile` from `@/types/profile` lets this
+// adapter compile in any context (Inngest functions, tests) without
+// dragging the wider profile types in.
+export type ProfileRowForMatching = {
+  housing_type: string | null
+  has_kids: boolean | null
+  kid_ages: number[] | null
+  other_pets: string | null
+  mesh_status: string | null
+  experience: string | null
+  activity_level: string | null
+  special_needs_ok: boolean | null
+  completion_pct: number | null
+}
+
+/**
+ * Convert a server-side `profiles` row into a MatchProfile for `score()`.
+ * Same target shape as `profileDraftToMatchProfile`, just sourced from the
+ * authoritative DB row (where `completion_pct` is set by the SQL trigger).
+ */
+export function profileRowToMatchProfile(row: ProfileRowForMatching): MatchProfile {
+  return {
+    housing_type: row.housing_type as Housing | null | undefined,
+    has_kids: row.has_kids,
+    kid_ages: row.kid_ages ?? [],
+    other_pets: row.other_pets as OtherPets | null | undefined,
+    mesh_status: row.mesh_status as MeshStatus | null | undefined,
+    experience: row.experience as Experience | null | undefined,
+    activity_level: row.activity_level as Activity | null | undefined,
+    special_needs_ok: row.special_needs_ok,
+    completion_pct: row.completion_pct ?? 0,
+  }
+}

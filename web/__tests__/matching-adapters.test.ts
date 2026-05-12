@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
-import { petToMatchPet, profileDraftToMatchProfile } from '@/lib/matching/adapters'
+import {
+  petToMatchPet,
+  profileDraftToMatchProfile,
+  profileRowToMatchProfile,
+  type ProfileRowForMatching,
+} from '@/lib/matching/adapters'
 import type { ProfileDraft } from '@/lib/onboarding/profile-draft'
 import type { Pet } from '@/types/pet'
 
@@ -85,5 +90,42 @@ describe('profileDraftToMatchProfile', () => {
     expect(mp.experience).toBe('experienced')
     expect(mp.special_needs_ok).toBe(true)
     expect(mp.mesh_status).toBe('meshed')
+  })
+})
+
+describe('profileRowToMatchProfile', () => {
+  const baseRow: ProfileRowForMatching = {
+    housing_type: 'hdb',
+    has_kids: true,
+    kid_ages: [4, 7],
+    other_pets: 'cats',
+    mesh_status: 'meshed',
+    experience: 'some',
+    activity_level: 'moderate',
+    special_needs_ok: false,
+    completion_pct: 80,
+  }
+
+  it('passes scalars through unchanged', () => {
+    const mp = profileRowToMatchProfile(baseRow)
+    expect(mp.housing_type).toBe('hdb')
+    expect(mp.has_kids).toBe(true)
+    expect(mp.kid_ages).toEqual([4, 7])
+    expect(mp.other_pets).toBe('cats')
+    expect(mp.mesh_status).toBe('meshed')
+    expect(mp.experience).toBe('some')
+    expect(mp.activity_level).toBe('moderate')
+    expect(mp.special_needs_ok).toBe(false)
+    expect(mp.completion_pct).toBe(80)
+  })
+
+  it('coerces null kid_ages and null completion_pct to safe defaults', () => {
+    const mp = profileRowToMatchProfile({
+      ...baseRow,
+      kid_ages: null,
+      completion_pct: null,
+    })
+    expect(mp.kid_ages).toEqual([])
+    expect(mp.completion_pct).toBe(0)
   })
 })
