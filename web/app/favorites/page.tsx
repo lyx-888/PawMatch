@@ -1,5 +1,6 @@
 import { AppHeader } from '@/components/layout/AppHeader'
 import { FavoritesClient } from '@/components/favorites/FavoritesClient'
+import { FavoritesReadinessSnippet } from '@/components/readiness/FavoritesReadinessSnippet'
 import { getSourceSummaries, summarizeForHeader } from '@/lib/db/pets'
 
 export const dynamic = 'force-dynamic'
@@ -16,6 +17,7 @@ export default async function FavoritesPage(): Promise<React.ReactElement> {
         <p className="text-sm text-stone-600">
           Saved on this device. They&apos;ll move with you when you create an account.
         </p>
+        <FavoritesReadinessSnippet />
         <FavoritesClient />
       </main>
     </div>
