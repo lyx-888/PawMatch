@@ -4,7 +4,7 @@ import { AppHeader } from '@/components/layout/AppHeader'
 import { PetDetailActions } from '@/components/pet/PetDetailActions'
 import { PetGalleryCarousel } from '@/components/pet/PetGalleryCarousel'
 import { formatAge, relativeFromNow, titleCase } from '@/lib/format'
-import { getPetById, getSourceSummaries } from '@/lib/db/pets'
+import { getPetById, getSourceSummaries, summarizeForHeader } from '@/lib/db/pets'
 
 type Props = {
   params: Promise<{ id: string }>
@@ -22,13 +22,7 @@ export default async function PetDetailPage({ params }: Props): Promise<React.Re
   const [pet, sources] = await Promise.all([getPetById(id), getSourceSummaries()])
   if (!pet) notFound()
 
-  const totalPets = sources.reduce((sum, s) => sum + s.petCount, 0)
-  const lastScrapedAt =
-    sources
-      .map((s) => s.lastScrapedAt)
-      .filter((v): v is string => Boolean(v))
-      .sort()
-      .at(-1) ?? null
+  const header = summarizeForHeader(sources)
 
   // Server-rendered staleness is per-request, intentionally a function of wall time.
   // eslint-disable-next-line react-hooks/purity
@@ -51,7 +45,7 @@ export default async function PetDetailPage({ params }: Props): Promise<React.Re
 
   return (
     <div className="flex min-h-full flex-col bg-stone-50">
-      <AppHeader totalPets={totalPets} lastScrapedAt={lastScrapedAt} />
+      <AppHeader {...header} />
       <main className="mx-auto flex w-full max-w-md flex-col gap-6 px-4 py-6">
         <section>
           <PetGalleryCarousel

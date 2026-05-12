@@ -15,6 +15,8 @@ type Props = {
   rounded?: boolean
 }
 
+const PLACEHOLDER = '/pet-placeholder.svg'
+
 export function PetGalleryCarousel({
   photos,
   alt,
@@ -22,8 +24,13 @@ export function PetGalleryCarousel({
   rounded = false,
 }: Props): React.ReactElement {
   const [index, setIndex] = useState(0)
-  const safePhotos = photos.length > 0 ? photos : ['/pet-placeholder.svg']
+  // Some shelter URLs 404/403 (e.g. SPCA's stale duplicate listings). Track
+  // which URLs failed so we render the placeholder for those, while a working
+  // sibling photo still loads normally when the user advances.
+  const [brokenUrls, setBrokenUrls] = useState<ReadonlySet<string>>(() => new Set())
+  const safePhotos = photos.length > 0 ? photos : [PLACEHOLDER]
   const current = safePhotos[Math.min(index, safePhotos.length - 1)]
+  const renderedSrc = brokenUrls.has(current) ? PLACEHOLDER : current
 
   const advance = (delta: number) => {
     setIndex((prev) => {
@@ -46,11 +53,19 @@ export function PetGalleryCarousel({
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={current}
+        src={renderedSrc}
         alt={alt}
         className="absolute inset-0 h-full w-full object-cover"
         loading="lazy"
         draggable={false}
+        // SPCA's Cloudflare hotlink protection 403s some images when a Referer
+        // header is sent (selectively — e.g. IMG_0103.jpeg). Stripping the
+        // referrer makes the request look like a direct fetch and they load.
+        referrerPolicy="no-referrer"
+        onError={() => {
+          if (current === PLACEHOLDER || brokenUrls.has(current)) return
+          setBrokenUrls((prev) => new Set(prev).add(current))
+        }}
       />
       {safePhotos.length > 1 && (
         <>
