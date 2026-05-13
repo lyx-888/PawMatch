@@ -6,6 +6,11 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.join(__dirname),
   },
+  // Allow LAN access during dev (phone testing over Wi-Fi). Next 16 blocks
+  // cross-origin requests to dev resources (HMR, RSC streaming) by default;
+  // without this the client-side feed never hydrates when opened from a
+  // non-localhost host.
+  allowedDevOrigins: ['192.168.68.53'],
 }
 
 export default withSentryConfig(nextConfig, {

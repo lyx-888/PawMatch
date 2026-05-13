@@ -3,10 +3,9 @@ import { notFound } from 'next/navigation'
 import { FavoriteNote } from '@/components/favorites/FavoriteNote'
 import { ProgressiveQuestionCard } from '@/components/onboarding/ProgressiveQuestionCard'
 import { PetDetailSheetClient } from '@/components/pet/PetDetailSheetClient'
-// Readiness snippets (Phase 2.10) are intentionally hidden from the UI for
-// now — the inline cards + /learn pages stay in the codebase so we can
-// re-enable when the deep-dive content is ready. Re-render <PetReadinessSnippet />
-// below the sheet client to bring them back.
+import { PetDetailSheetModal } from '@/components/pet/PetDetailSheetModal'
+// Readiness snippets (Phase 2.10) are intentionally hidden — see comment in
+// app/pets/[id]/page.tsx for re-enabling instructions.
 import { getPetById } from '@/lib/db/pets'
 import { formatAge, relativeFromNow, titleCase } from '@/lib/format'
 import type { ProgressiveContext } from '@/lib/onboarding/progressive'
@@ -19,17 +18,15 @@ export const dynamic = 'force-dynamic'
 
 const STALE_AFTER_MS = 48 * 60 * 60 * 1000
 
-// Pet detail surface, restyled to match the prototype's DetailSheet —
-// drag-handle, hero photo, tier dot line, big display name, inline facts,
-// prose bio, "How {name} fits your home" reasoning card, facts pills,
-// shelter row, primary CTA, then the existing functional pieces
-// (readiness snippet, progressive Q, favorite note) below.
+// Intercepting route — when the user taps the info button on /, this slot
+// activates with the pet detail rendered inside a bottom-sheet modal that
+// overlays the swipe surface (matches the prototype's DetailSheet).
 //
-// AppHeader is intentionally NOT rendered here — this is a detail surface,
-// not a list surface; the bottom-nav (mobile) / SideNav (desktop) handle
-// navigation back out.
+// Direct URL navigation to /pets/[id] (refresh, share, deep link) still
+// uses the full page at app/pets/[id]/page.tsx — the modal version is a
+// UX enhancement for in-app navigation only.
 
-export default async function PetDetailPage({ params }: Props): Promise<React.ReactElement> {
+export default async function PetDetailModal({ params }: Props): Promise<React.ReactElement> {
   const { id } = await params
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
   if (!isUuid) notFound()
@@ -37,7 +34,6 @@ export default async function PetDetailPage({ params }: Props): Promise<React.Re
   const pet = await getPetById(id)
   if (!pet) notFound()
 
-  // Server-rendered staleness is per-request, intentionally a function of wall time.
   // eslint-disable-next-line react-hooks/purity
   const isStale = Date.now() - new Date(pet.lastSeenAt).getTime() > STALE_AFTER_MS
 
@@ -59,11 +55,7 @@ export default async function PetDetailPage({ params }: Props): Promise<React.Re
   const size = titleCase(pet.size)
   const weight = pet.weightKg ? `${pet.weightKg} kg` : null
 
-  // Inline facts on the headline row, in handoff order: breed · sex · weight · age.
   const headerFacts = [breed, sex, weight, age].filter((v): v is string => Boolean(v))
-
-  // Facts pill row below the bio. Use what's not already in the headline so
-  // the pills add information rather than restate.
   const factsPills = [
     size,
     pet.hdbApproved === true ? 'HDB-approved' : null,
@@ -71,19 +63,19 @@ export default async function PetDetailPage({ params }: Props): Promise<React.Re
   ].filter((v): v is string => Boolean(v))
 
   return (
-    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-6 pt-2.5 pb-9">
-      <PetDetailSheetClient
-        pet={pet}
-        sourceLabel={sourceLabel}
-        listedAgo={listedAgo}
-        isStale={isStale}
-        headerFacts={headerFacts}
-        factsPills={factsPills}
-      />
-
-      <ProgressiveQuestionCard context={progressiveContext} />
-
-      <FavoriteNote petId={pet.id} petName={pet.name} />
-    </main>
+    <PetDetailSheetModal>
+      <div className="flex flex-col gap-4 px-6 pt-2.5 pb-9">
+        <PetDetailSheetClient
+          pet={pet}
+          sourceLabel={sourceLabel}
+          listedAgo={listedAgo}
+          isStale={isStale}
+          headerFacts={headerFacts}
+          factsPills={factsPills}
+        />
+        <ProgressiveQuestionCard context={progressiveContext} />
+        <FavoriteNote petId={pet.id} petName={pet.name} />
+      </div>
+    </PetDetailSheetModal>
   )
 }

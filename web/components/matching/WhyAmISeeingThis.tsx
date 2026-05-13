@@ -23,13 +23,22 @@ export function WhyAmISeeingThis({ match, className }: Props): React.ReactElemen
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="text-amber-700 underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700"
+        className="underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--primary)]"
+        style={{ color: 'var(--primary)' }}
       >
         {open ? t('match.why_hide') : t('match.why_show')}
       </button>
       {open && (
-        <div className="mt-2 rounded-2xl border border-stone-200 bg-stone-50 p-3">
-          <p className="text-xs text-stone-500">{t('match.score', { score: match.score })}</p>
+        <div
+          className="mt-2 rounded-2xl p-3"
+          style={{
+            background: 'var(--surfaceAlt)',
+            boxShadow: 'inset 0 0 0 1px var(--muteLine)',
+          }}
+        >
+          <p className="text-xs" style={{ color: 'var(--mute)' }}>
+            {t('match.score', { score: match.score })}
+          </p>
           <ReasonList reasons={match.reasons} limit={Infinity} className="mt-2 text-sm" />
         </div>
       )}

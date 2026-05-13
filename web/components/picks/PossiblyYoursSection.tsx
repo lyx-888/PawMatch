@@ -16,25 +16,36 @@ export function PossiblyYoursSection({ pets }: Props): React.ReactElement | null
   return (
     <section
       aria-labelledby="possibly-yours-heading"
-      className="-mx-4 flex flex-col gap-3 border-b border-stone-200 bg-white px-4 py-4"
+      className="-mx-4 flex flex-col gap-3 px-4 py-4"
+      style={{ borderBottom: '1px solid var(--muteLine)' }}
     >
       <div className="flex items-baseline justify-between">
         <h2
           id="possibly-yours-heading"
-          className="text-sm font-semibold tracking-wide text-stone-900 uppercase"
+          className="text-[10px] font-bold tracking-[0.08em] uppercase"
+          style={{ color: 'var(--ink)' }}
         >
           {t('possibly_yours.title')}
         </h2>
-        <span className="text-xs text-stone-500">{t('possibly_yours.subtitle')}</span>
+        <span className="text-xs" style={{ color: 'var(--mute)' }}>
+          {t('possibly_yours.subtitle')}
+        </span>
       </div>
       <ul className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-1" role="list">
         {pets.map((pet) => (
           <li key={pet.id} className="w-32 shrink-0">
             <Link
               href={`/pets/${pet.id}`}
-              className="group flex flex-col gap-1.5 rounded-2xl bg-white shadow-sm ring-1 ring-stone-200 transition hover:ring-amber-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+              className="group flex flex-col gap-1.5 rounded-2xl transition"
+              style={{
+                background: 'var(--surface)',
+                boxShadow: 'inset 0 0 0 1px var(--muteLine), 0 1px 2px rgba(30,24,16,0.04)',
+              }}
             >
-              <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-stone-100">
+              <div
+                className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl"
+                style={{ background: 'var(--surfaceAlt)' }}
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={pet.photoUrls[0] ?? '/pet-placeholder.svg'}
@@ -51,8 +62,10 @@ export function PossiblyYoursSection({ pets }: Props): React.ReactElement | null
                 />
               </div>
               <div className="px-2 pb-2">
-                <p className="truncate text-sm font-semibold text-stone-900">{pet.name}</p>
-                <p className="truncate text-[11px] text-stone-600">
+                <p className="truncate text-sm font-semibold" style={{ color: 'var(--ink)' }}>
+                  {pet.name}
+                </p>
+                <p className="truncate text-[11px]" style={{ color: 'var(--mute)' }}>
                   {[titleCase(pet.species), formatAge(pet.ageMonths)].filter(Boolean).join(' · ')}
                 </p>
               </div>

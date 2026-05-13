@@ -2,10 +2,9 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { FavoriteNote } from './FavoriteNote'
-import { cn } from '@/lib/cn'
 import { formatAge, titleCase } from '@/lib/format'
 import { t } from '@/lib/i18n'
 import { useFavorites, useFavoriteNote } from '@/lib/local-state'
@@ -92,12 +91,16 @@ export function FavoritesClient(): React.ReactElement {
   }, [router, selectedIds])
 
   if (state.kind === 'loading') {
-    return <p className="text-sm text-stone-600">{t('favorites.loading')}</p>
+    return (
+      <p className="text-sm" style={{ color: 'var(--mute)' }}>
+        {t('favorites.loading')}
+      </p>
+    )
   }
 
   if (state.kind === 'error') {
     return (
-      <p className="text-sm text-rose-600">
+      <p className="text-sm" style={{ color: 'var(--danger)' }}>
         {t('favorites.load_error', { reason: state.message })}
       </p>
     )
@@ -105,8 +108,13 @@ export function FavoritesClient(): React.ReactElement {
 
   if (state.kind === 'empty') {
     return (
-      <div className="rounded-2xl border-2 border-dashed border-stone-200 bg-white p-6 text-center">
-        <p className="text-sm text-stone-700">{t('favorites.empty')}</p>
+      <div
+        className="rounded-2xl border-2 border-dashed p-6 text-center"
+        style={{ borderColor: 'var(--muteLine)', background: 'var(--surface)' }}
+      >
+        <p className="text-sm" style={{ color: 'var(--ink)' }}>
+          {t('favorites.empty')}
+        </p>
       </div>
     )
   }
@@ -116,7 +124,7 @@ export function FavoritesClient(): React.ReactElement {
   return (
     <div className="flex flex-col gap-3">
       {state.missingIds.length > 0 && (
-        <p className="text-xs text-amber-700">
+        <p className="text-xs" style={{ color: 'var(--amber-tone)' }}>
           {t(state.missingIds.length === 1 ? 'favorites.missing_one' : 'favorites.missing_other', {
             count: state.missingIds.length,
           })}
@@ -176,11 +184,18 @@ function SelectionToolbar({
     <div className="flex items-center justify-between gap-2">
       {active ? (
         <>
-          <p className="text-sm text-stone-700">{t('favorites.select_prompt')}</p>
+          <p className="text-sm" style={{ color: 'var(--ink)' }}>
+            {t('favorites.select_prompt')}
+          </p>
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-full border border-stone-200 bg-white px-3 py-1 text-xs font-medium text-stone-700 hover:bg-stone-50"
+            className="rounded-full px-3 py-1 text-xs font-medium"
+            style={{
+              background: 'var(--surface)',
+              color: 'var(--ink)',
+              boxShadow: 'inset 0 0 0 1px var(--muteLine)',
+            }}
           >
             {t('favorites.cancel')}
           </button>
@@ -189,7 +204,12 @@ function SelectionToolbar({
         <button
           type="button"
           onClick={onStart}
-          className="ml-auto rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-800 hover:bg-amber-100"
+          className="ml-auto rounded-full px-3 py-1 text-xs font-medium"
+          style={{
+            background: 'var(--amber-soft)',
+            color: 'var(--amber-tone)',
+            boxShadow: 'inset 0 0 0 1px var(--amber-tone)',
+          }}
         >
           {t('favorites.compare_cta')}
         </button>
@@ -211,7 +231,10 @@ function CompareFooter({
   // The footer is sticky at the bottom of the favorites list so the CTA
   // stays reachable while scrolling a long grid.
   return (
-    <div className="sticky bottom-2 z-10 mt-2 flex items-center justify-between gap-3 rounded-full bg-stone-900 px-4 py-2 text-sm text-white shadow-lg">
+    <div
+      className="sticky bottom-2 z-10 mt-2 flex items-center justify-between gap-3 rounded-full px-4 py-2 text-sm text-white shadow-lg"
+      style={{ background: 'var(--ink)' }}
+    >
       <span aria-live="polite">
         {count === 0
           ? t('favorites.pick_n_to_m', { min: COMPARE_MIN, max: COMPARE_MAX })
@@ -223,7 +246,8 @@ function CompareFooter({
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-full px-3 py-1 text-xs font-medium text-stone-300 hover:text-white"
+          className="rounded-full px-3 py-1 text-xs font-medium hover:text-white"
+          style={{ color: 'rgba(255,255,255,0.7)' }}
         >
           {t('favorites.cancel')}
         </button>
@@ -231,7 +255,8 @@ function CompareFooter({
           type="button"
           onClick={onCompare}
           disabled={!ready}
-          className="rounded-full bg-amber-500 px-4 py-1.5 text-xs font-semibold text-stone-900 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-full px-4 py-1.5 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-50"
+          style={{ background: 'var(--primary)', color: '#fff' }}
         >
           {t('favorites.compare')}
         </button>
@@ -260,24 +285,31 @@ function FavoriteCard({
   const { note } = useFavoriteNote(pet.id)
   const hasNote = note.trim().length > 0
 
-  const cardClass = useMemo(
-    () =>
-      cn(
-        'group flex flex-col gap-2 rounded-2xl bg-white p-2 shadow-sm ring-1 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500',
-        selectionMode
-          ? selected
-            ? 'ring-2 ring-amber-500 cursor-pointer'
-            : maxReached
-              ? 'ring-stone-200 opacity-50 cursor-not-allowed'
-              : 'ring-stone-200 cursor-pointer hover:ring-amber-400'
-          : 'ring-stone-200 hover:ring-amber-400',
-      ),
-    [maxReached, selected, selectionMode],
-  )
+  const statusFg =
+    pet.status === 'available'
+      ? 'var(--sage)'
+      : pet.status === 'pending'
+        ? 'var(--amber-tone)'
+        : 'var(--mute)'
+
+  const cardStyle: React.CSSProperties = {
+    background: 'var(--surface)',
+    boxShadow:
+      selectionMode && selected
+        ? 'inset 0 0 0 2px var(--primary)'
+        : 'inset 0 0 0 1px var(--muteLine), 0 1px 2px rgba(30,24,16,0.04)',
+    opacity: selectionMode && !selected && maxReached ? 0.5 : 1,
+    cursor: selectionMode ? (maxReached && !selected ? 'not-allowed' : 'pointer') : 'pointer',
+  }
+  const cardClass =
+    'group flex flex-col gap-2 rounded-2xl p-2 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--primary)]'
 
   const inner = (
     <>
-      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl bg-stone-100">
+      <div
+        className="relative aspect-[4/5] w-full overflow-hidden rounded-xl"
+        style={{ background: 'var(--surfaceAlt)' }}
+      >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={pet.photoUrls[0] ?? '/pet-placeholder.svg'}
@@ -295,34 +327,38 @@ function FavoriteCard({
           }}
         />
         <span
-          className={cn(
-            'absolute top-2 right-2 rounded-full px-2 py-0.5 text-[10px] font-medium tracking-wide uppercase',
-            pet.status === 'available'
-              ? 'bg-emerald-100/90 text-emerald-800'
-              : pet.status === 'pending'
-                ? 'bg-amber-100/90 text-amber-900'
-                : 'bg-stone-200/90 text-stone-700',
-          )}
+          className="absolute top-2 right-2 inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase backdrop-blur-sm"
+          style={{
+            background: 'rgba(255,255,255,0.94)',
+            color: statusFg,
+          }}
         >
+          <span
+            aria-hidden="true"
+            className="inline-block size-1 rounded-full"
+            style={{ background: statusFg }}
+          />
           {pet.status}
         </span>
         {selectionMode && (
           <span
             aria-hidden="true"
-            className={cn(
-              'absolute top-2 left-2 flex h-6 w-6 items-center justify-center rounded-full border-2 text-xs font-bold',
-              selected
-                ? 'border-amber-500 bg-amber-500 text-white'
-                : 'border-white bg-white/80 text-stone-400',
-            )}
+            className="absolute top-2 left-2 flex h-6 w-6 items-center justify-center rounded-full border-2 text-xs font-bold"
+            style={{
+              borderColor: selected ? 'var(--primary)' : '#fff',
+              background: selected ? 'var(--primary)' : 'rgba(255,255,255,0.8)',
+              color: selected ? '#fff' : 'var(--mute)',
+            }}
           >
             {selected ? '✓' : ''}
           </span>
         )}
       </div>
       <div className="px-1 pb-1">
-        <p className="text-sm font-semibold text-stone-900">{pet.name}</p>
-        <p className="text-xs text-stone-600">
+        <p className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>
+          {pet.name}
+        </p>
+        <p className="text-xs" style={{ color: 'var(--mute)' }}>
           {[titleCase(pet.species), pet.breed, formatAge(pet.ageMonths)]
             .filter(Boolean)
             .join(' · ')}
@@ -346,11 +382,12 @@ function FavoriteCard({
             },
           )}
           className={cardClass}
+          style={cardStyle}
         >
           {inner}
         </button>
       ) : (
-        <Link href={`/pets/${pet.id}`} className={cardClass}>
+        <Link href={`/pets/${pet.id}`} className={cardClass} style={cardStyle}>
           {inner}
         </Link>
       )}
@@ -361,12 +398,17 @@ function FavoriteCard({
             type="button"
             onClick={onToggleNote}
             aria-expanded={noteOpen}
-            className="flex items-center justify-between gap-2 rounded-xl border border-stone-200 bg-white px-3 py-2 text-left text-xs text-stone-700 transition hover:bg-stone-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+            className="flex items-center justify-between gap-2 rounded-xl px-3 py-2 text-left text-xs transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--primary)]"
+            style={{
+              background: 'var(--surface)',
+              boxShadow: 'inset 0 0 0 1px var(--muteLine)',
+              color: 'var(--ink)',
+            }}
           >
-            <span className={cn('truncate', !hasNote && 'text-stone-500')}>
+            <span className="truncate" style={{ color: hasNote ? 'var(--ink)' : 'var(--mute)' }}>
               {hasNote ? note : t('favorites.note_add')}
             </span>
-            <span aria-hidden="true" className="shrink-0 text-stone-400">
+            <span aria-hidden="true" className="shrink-0" style={{ color: 'var(--mute)' }}>
               {noteOpen ? '−' : '+'}
             </span>
           </button>

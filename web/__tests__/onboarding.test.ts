@@ -8,10 +8,10 @@ import {
   writeProfileDraft,
 } from '@/lib/onboarding/profile-draft'
 import {
-  SWIPE_PROMPT_THRESHOLD,
   markOnboardingCompleted,
   markOnboardingDismissed,
   readOnboardingState,
+  shouldShowOnboardingOnFirstVisit,
 } from '@/lib/onboarding/state'
 
 beforeEach(() => window.localStorage.clear())
@@ -140,10 +140,44 @@ describe('onboarding state', () => {
   })
 })
 
-describe('SWIPE_PROMPT_THRESHOLD', () => {
-  // Pinning the constant in tests so future tweaks don't accidentally
-  // break the §2.2 spec ("After 5 swipes").
-  it('matches the spec', () => {
-    expect(SWIPE_PROMPT_THRESHOLD).toBe(5)
+describe('shouldShowOnboardingOnFirstVisit', () => {
+  // Phase 2.4 (reworked): the quiz appears on first visit, not after 5 swipes.
+  // It is suppressed once the user has dismissed it (skip is sticky), once
+  // they've completed it, or once essentials are already in the draft (e.g.
+  // migrated from another device).
+
+  it('shows on a truly fresh visit', () => {
+    expect(shouldShowOnboardingOnFirstVisit({ dismissedAt: null, completedAt: null }, {})).toBe(
+      true,
+    )
+  })
+
+  it('stays hidden once skipped', () => {
+    expect(
+      shouldShowOnboardingOnFirstVisit(
+        { dismissedAt: '2026-05-13T00:00:00Z', completedAt: null },
+        {},
+      ),
+    ).toBe(false)
+  })
+
+  it('stays hidden once completed', () => {
+    expect(
+      shouldShowOnboardingOnFirstVisit(
+        { dismissedAt: null, completedAt: '2026-05-13T00:00:00Z' },
+        { housing_type: 'hdb', has_kids: false, other_pets: 'none' },
+      ),
+    ).toBe(false)
+  })
+
+  it('stays hidden when essentials are already in the draft', () => {
+    // Covers the cross-device migration case where the draft is pre-populated
+    // but onboarding state is fresh.
+    expect(
+      shouldShowOnboardingOnFirstVisit(
+        { dismissedAt: null, completedAt: null },
+        { housing_type: 'hdb', has_kids: false, other_pets: 'none' },
+      ),
+    ).toBe(false)
   })
 })

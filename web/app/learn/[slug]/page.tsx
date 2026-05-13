@@ -24,20 +24,27 @@ export default async function LearnGuidePage({ params }: Props): Promise<React.R
   const header = summarizeForHeader(sources)
 
   return (
-    <div className="flex min-h-full flex-col bg-stone-50">
+    <div className="flex min-h-full flex-col">
       <AppHeader {...header} />
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 px-4 py-6">
-        <Link href="/learn" className="text-sm text-amber-700 hover:text-amber-800">
+        <Link href="/learn" className="text-sm" style={{ color: 'var(--primary)' }}>
           {t('learn.back')}
         </Link>
-        <h1 className="text-2xl font-bold tracking-tight text-stone-900">{snippet.title}</h1>
-        <p className="text-base text-stone-700">{snippet.summary}</p>
-        <ul className="ml-5 list-disc space-y-2 text-sm text-stone-800">
+        <h1 className="display text-2xl" style={{ color: 'var(--ink)' }}>
+          {snippet.title}
+        </h1>
+        <p className="text-base" style={{ color: 'var(--ink)' }}>
+          {snippet.summary}
+        </p>
+        <ul className="ml-5 list-disc space-y-2 text-sm" style={{ color: 'var(--ink)' }}>
           {snippet.bullets.map((bullet) => (
             <li key={bullet}>{bullet}</li>
           ))}
         </ul>
-        <p className="mt-4 rounded-xl bg-stone-100 p-3 text-xs text-stone-600">
+        <p
+          className="mt-4 rounded-xl p-3 text-xs"
+          style={{ background: 'var(--surfaceAlt)', color: 'var(--mute)' }}
+        >
           {t('learn.placeholder')}
         </p>
       </main>

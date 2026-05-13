@@ -65,27 +65,38 @@ export function OnboardingForm({ onComplete, onClose, className }: Props): React
       role="dialog"
       aria-labelledby="onboarding-form-heading"
       aria-modal="false"
-      className={cn('rounded-3xl border border-stone-200 bg-white p-5 shadow-md', className)}
+      className={cn('rounded-3xl p-5', className)}
+      style={{
+        background: 'var(--surface)',
+        boxShadow: 'inset 0 0 0 1px var(--muteLine), 0 8px 24px -10px rgba(40,32,24,0.18)',
+      }}
     >
       <div className="flex items-start justify-between gap-3">
-        <h2 id="onboarding-form-heading" className="text-lg font-bold text-stone-900">
+        <h2
+          id="onboarding-form-heading"
+          className="display text-lg"
+          style={{ color: 'var(--ink)' }}
+        >
           {t('onboarding.form_heading')}
         </h2>
         <button
           type="button"
           onClick={onClose}
           aria-label={t('onboarding.form_close_aria')}
-          className="-mt-1 -mr-2 rounded-full p-2 text-stone-500 transition hover:bg-stone-100 hover:text-stone-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-400"
+          className="-mt-1 -mr-2 rounded-full p-2 transition hover:bg-black/[0.04]"
+          style={{ color: 'var(--mute)' }}
         >
           <span aria-hidden="true" className="text-xl leading-none">
             ×
           </span>
         </button>
       </div>
-      <p className="mt-1 text-sm text-stone-600">{t('onboarding.form_intro')}</p>
+      <p className="mt-1 text-sm" style={{ color: 'var(--mute)' }}>
+        {t('onboarding.form_intro')}
+      </p>
 
       <fieldset className="mt-5">
-        <legend className="text-sm font-semibold text-stone-900">
+        <legend className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>
           {t('onboarding.q_housing')}
         </legend>
         <OptionGrid
@@ -97,7 +108,9 @@ export function OnboardingForm({ onComplete, onClose, className }: Props): React
       </fieldset>
 
       <fieldset className="mt-5">
-        <legend className="text-sm font-semibold text-stone-900">{t('onboarding.q_kids')}</legend>
+        <legend className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>
+          {t('onboarding.q_kids')}
+        </legend>
         <OptionGrid
           name="has_kids"
           options={KIDS_OPTIONS}
@@ -107,7 +120,7 @@ export function OnboardingForm({ onComplete, onClose, className }: Props): React
       </fieldset>
 
       <fieldset className="mt-5">
-        <legend className="text-sm font-semibold text-stone-900">
+        <legend className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>
           {t('onboarding.q_other_pets')}
         </legend>
         <OptionGrid
@@ -122,7 +135,8 @@ export function OnboardingForm({ onComplete, onClose, className }: Props): React
         <button
           type="button"
           onClick={onClose}
-          className="rounded-full px-3 py-1.5 text-sm font-medium text-stone-600 transition hover:text-stone-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-400"
+          className="rounded-full px-3 py-1.5 text-sm font-medium transition"
+          style={{ color: 'var(--mute)' }}
         >
           {t('onboarding.form_save')}
         </button>
@@ -130,7 +144,12 @@ export function OnboardingForm({ onComplete, onClose, className }: Props): React
           type="button"
           onClick={() => onComplete(draft)}
           disabled={!allAnswered}
-          className="rounded-full bg-amber-600 px-4 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700 disabled:cursor-not-allowed disabled:bg-stone-300 disabled:text-stone-500"
+          className="rounded-full px-4 py-1.5 text-sm font-semibold transition disabled:cursor-not-allowed"
+          style={{
+            background: allAnswered ? 'var(--primary)' : 'var(--surfaceAlt)',
+            color: allAnswered ? '#fff' : 'var(--mute)',
+            boxShadow: allAnswered ? '0 6px 14px rgba(181,101,74,0.30)' : 'none',
+          }}
         >
           {t('onboarding.form_done')}
         </button>
@@ -167,12 +186,14 @@ function OptionGrid<T extends string | boolean>({
             role="radio"
             aria-checked={selected}
             onClick={() => onSelect(opt.value)}
-            className={cn(
-              'rounded-2xl border px-3 py-2 text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700',
-              selected
-                ? 'border-amber-500 bg-amber-50 text-amber-900'
-                : 'border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:bg-stone-50',
-            )}
+            className="rounded-2xl px-3 py-2 text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--primary)]"
+            style={{
+              background: selected ? 'var(--primarySoft)' : 'var(--surface)',
+              color: selected ? 'var(--primary)' : 'var(--ink)',
+              boxShadow: selected
+                ? 'inset 0 0 0 1px var(--primary)'
+                : 'inset 0 0 0 1px var(--muteLine)',
+            }}
           >
             {t(opt.labelKey)}
           </button>

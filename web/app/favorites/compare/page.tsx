@@ -49,7 +49,7 @@ export default async function CompareFavoritesPage({
   const header = summarizeForHeader(sources)
 
   return (
-    <div className="flex min-h-full flex-col bg-stone-50">
+    <div className="flex min-h-full flex-col">
       <AppHeader {...header} />
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 px-4 py-6">
         <CompareView pets={resolved} />

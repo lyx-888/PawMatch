@@ -2,7 +2,7 @@
 
 import { useCallback, useSyncExternalStore } from 'react'
 
-import { hasAllEssentials, useProfileDraft } from './profile-draft'
+import { hasAllEssentials, useProfileDraft, type ProfileDraft } from './profile-draft'
 
 // Tracks whether the user has dismissed the onboarding prompt or completed
 // it. Stored in its own localStorage key so we can reset the prompt without
@@ -11,16 +11,11 @@ import { hasAllEssentials, useProfileDraft } from './profile-draft'
 const ONBOARDING_STATE_KEY = 'pawmatch_onboarding_state'
 const ONBOARDING_STATE_EVENT = 'pawmatch:onboarding-state'
 
-// Phase 2.4 acceptance: "prompt appears at swipe #5". Stored as a constant
-// so future tuning is a one-line change and tests can reference the same
-// number.
-export const SWIPE_PROMPT_THRESHOLD = 5
-
 export type OnboardingState = {
-  // ISO timestamp of when the user tapped "Not now". null when never
-  // dismissed. We persist a single dismissal — the prompt doesn't re-fire
-  // automatically. Progressive profiling (Phase 2.5) is what surfaces
-  // follow-up questions later.
+  // ISO timestamp of when the user tapped "Skip". null when never dismissed.
+  // We persist a single dismissal — the prompt doesn't re-fire automatically.
+  // Progressive profiling (Phase 2.5) is what surfaces follow-up questions
+  // later.
   dismissedAt: string | null
   // ISO timestamp of when the three essentials were last completed.
   // Cleared if the user later nulls one of those fields.
@@ -94,26 +89,35 @@ function useOnboardingStateBase(): OnboardingState {
 }
 
 /**
- * Decide whether the onboarding prompt should be shown right now.
+ * Pure predicate: decide whether the upfront quiz should be shown for the
+ * given onboarding state + profile draft. Exported so unit tests can pin the
+ * rules without a React render. The hook wrapper below is the thing actual
+ * components use.
  *
- * Inputs:
- *   * `swipesThisSession` — number of swipes since the page loaded.
- *   * Onboarding state from localStorage (dismissed / completed).
- *   * Profile draft from localStorage (already has essentials?).
- *
- * Rules:
+ * Rules (post-Phase 2.4 rework — see docs/requirements/02-features.md §2.2):
  *   * Don't show if essentials are already filled (draft from a previous
  *     session, or just-completed in this one).
- *   * Don't show if the user dismissed it.
- *   * Show once `swipesThisSession >= SWIPE_PROMPT_THRESHOLD`.
+ *   * Don't show if the user dismissed it (skip is sticky across sessions).
+ *   * Otherwise show — first visit, no profile yet, never skipped.
  */
-export function useShouldShowOnboardingPrompt(swipesThisSession: number): boolean {
-  const state = useOnboardingStateBase()
-  const draft = useProfileDraft()
+export function shouldShowOnboardingOnFirstVisit(
+  state: OnboardingState,
+  draft: ProfileDraft,
+): boolean {
   if (state.dismissedAt) return false
   if (state.completedAt) return false
   if (hasAllEssentials(draft)) return false
-  return swipesThisSession >= SWIPE_PROMPT_THRESHOLD
+  return true
+}
+
+/**
+ * React hook variant: subscribes to localStorage so the quiz auto-hides
+ * once the user completes or skips it.
+ */
+export function useShouldShowOnboardingOnFirstVisit(): boolean {
+  const state = useOnboardingStateBase()
+  const draft = useProfileDraft()
+  return shouldShowOnboardingOnFirstVisit(state, draft)
 }
 
 export function useOnboardingActions(): {

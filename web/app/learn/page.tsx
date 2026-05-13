@@ -15,20 +15,32 @@ export default async function LearnPage(): Promise<React.ReactElement> {
   const header = summarizeForHeader(sources)
 
   return (
-    <div className="flex min-h-full flex-col bg-stone-50">
+    <div className="flex min-h-full flex-col">
       <AppHeader {...header} />
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 px-4 py-6">
-        <h1 className="text-2xl font-bold tracking-tight text-stone-900">{t('learn.title')}</h1>
-        <p className="text-sm text-stone-600">{t('learn.intro')}</p>
+        <h1 className="display text-2xl" style={{ color: 'var(--ink)' }}>
+          {t('learn.title')}
+        </h1>
+        <p className="text-sm" style={{ color: 'var(--mute)' }}>
+          {t('learn.intro')}
+        </p>
         <ul className="flex flex-col gap-2" role="list">
           {SNIPPETS.map((snippet) => (
             <li key={snippet.id}>
               <Link
                 href={`/learn/${snippet.learnSlug}`}
-                className="flex flex-col gap-1 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-stone-200 transition hover:ring-amber-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+                className="flex flex-col gap-1 rounded-2xl p-3 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--primary)]"
+                style={{
+                  background: 'var(--surface)',
+                  boxShadow: 'inset 0 0 0 1px var(--muteLine), 0 1px 2px rgba(30,24,16,0.04)',
+                }}
               >
-                <p className="text-sm font-semibold text-stone-900">{snippet.title}</p>
-                <p className="text-xs text-stone-600">{snippet.summary}</p>
+                <p className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>
+                  {snippet.title}
+                </p>
+                <p className="text-xs" style={{ color: 'var(--mute)' }}>
+                  {snippet.summary}
+                </p>
               </Link>
             </li>
           ))}

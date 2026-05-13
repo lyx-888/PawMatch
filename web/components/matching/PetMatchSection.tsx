@@ -25,7 +25,7 @@ export function PetMatchSection({ pet }: Props): React.ReactElement | null {
   return (
     <section aria-labelledby="match-section" className="flex flex-col gap-2">
       <div className="flex items-center justify-between gap-2">
-        <h2 id="match-section" className="text-lg font-semibold text-stone-900">
+        <h2 id="match-section" className="display text-lg" style={{ color: 'var(--ink)' }}>
           {t('match.section_title')}
         </h2>
         <TierBadge tier={match.tier} />

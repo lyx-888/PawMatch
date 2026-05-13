@@ -9,10 +9,13 @@ type Props = {
   className?: string
 }
 
-const KIND_CLASS: Record<Reason['kind'], string> = {
-  positive: 'text-emerald-800',
-  note: 'text-stone-700',
-  risk: 'text-rose-800',
+// Token-driven colours (prototype palette). Positive reasons in sage, notes
+// in ink, risks in danger. Icons stay the same compact glyphs the layout
+// already depends on for alignment.
+const KIND_STYLE: Record<Reason['kind'], React.CSSProperties> = {
+  positive: { color: 'var(--sage)' },
+  note: { color: 'var(--ink)' },
+  risk: { color: 'var(--danger)' },
 }
 
 const KIND_ICON: Record<Reason['kind'], string> = {
@@ -34,7 +37,11 @@ export function ReasonList({ reasons, limit = 2, className }: Props): React.Reac
   return (
     <ul className={cn('flex flex-col gap-1 text-xs', className)}>
       {picked.map((reason, i) => (
-        <li key={`${reason.template}-${i}`} className={cn('flex gap-1.5', KIND_CLASS[reason.kind])}>
+        <li
+          key={`${reason.template}-${i}`}
+          className="flex gap-1.5"
+          style={KIND_STYLE[reason.kind]}
+        >
           <span aria-hidden="true" className="select-none">
             {KIND_ICON[reason.kind]}
           </span>

@@ -67,7 +67,8 @@ export function PetDetailActions({ pet, className }: Props): React.ReactElement 
         target="_blank"
         rel="noopener noreferrer"
         onClick={() => track('handoff_clicked', { pet_id: pet.id, source: pet.source })}
-        className="flex h-12 w-full items-center justify-center rounded-full bg-amber-600 px-6 text-base font-semibold text-white shadow-sm transition hover:bg-amber-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+        className="flex h-12 w-full items-center justify-center rounded-[14px] px-6 text-base font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--primary)]"
+        style={{ background: 'var(--ink)', color: '#fff' }}
       >
         {t('pet_detail.view_on', { source: pet.source.replace(/_/g, ' ').toUpperCase() })}
       </a>
@@ -126,12 +127,16 @@ function ActionButton({
       disabled={disabled}
       aria-label={ariaLabel}
       className={cn(
-        'flex h-11 items-center justify-center rounded-full border text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500',
-        intent === 'active'
-          ? 'border-amber-600 bg-amber-50 text-amber-800'
-          : 'border-stone-200 bg-white text-stone-700 hover:bg-stone-50',
-        disabled && 'opacity-50',
+        'flex h-11 items-center justify-center rounded-full text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--primary)] disabled:opacity-50',
       )}
+      style={{
+        background: intent === 'active' ? 'var(--primarySoft)' : 'var(--surface)',
+        color: intent === 'active' ? 'var(--primary)' : 'var(--ink)',
+        boxShadow:
+          intent === 'active'
+            ? 'inset 0 0 0 1px var(--primary)'
+            : 'inset 0 0 0 1px var(--muteLine)',
+      }}
     >
       {label}
     </button>
