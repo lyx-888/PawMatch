@@ -10,11 +10,15 @@ export default async function SearchPage(): Promise<React.ReactElement> {
   const header = summarizeForHeader(sources)
 
   return (
-    <div className="flex min-h-full flex-col bg-stone-50">
+    <div className="flex min-h-full flex-col">
       <AppHeader {...header} />
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 px-4 py-6">
-        <h1 className="text-2xl font-bold tracking-tight text-stone-900">{t('search.title')}</h1>
-        <p className="text-sm text-stone-600">{t('search.subtitle')}</p>
+        <h1 className="display text-2xl" style={{ color: 'var(--ink)' }}>
+          {t('search.title')}
+        </h1>
+        <p className="text-sm" style={{ color: 'var(--mute)' }}>
+          {t('search.subtitle')}
+        </p>
         <SearchClient
           // Only list shelters that actually have pets right now — filtering by
           // a placeholder shelter (Phase 1 only has SPCA wired) would always

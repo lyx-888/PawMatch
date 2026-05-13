@@ -7,27 +7,40 @@ type Props = {
   className?: string
 }
 
-// Colour scale per requirements §2.3 — distinct enough that a user
-// scanning the swipe stack can tell them apart at a glance.
-const TIER_CLASS: Record<Tier, string> = {
-  great: 'bg-emerald-100 text-emerald-900 border-emerald-300',
-  good: 'bg-amber-100 text-amber-900 border-amber-300',
-  stretch: 'bg-stone-100 text-stone-700 border-stone-300',
-  hard_fail: 'bg-rose-100 text-rose-900 border-rose-300',
+// Tier palette ported from the claudedesign prototype. Frosted-white badge
+// with a coloured dot, label colour matches the tier so a scanning user
+// can pick a tier out at a glance without bold backgrounds. Used on the
+// pet detail page, favorites list, and compare view — the SwipeCard has
+// its own inline version that lives over the dark photo overlay.
+const TIER_FG: Record<Tier, string> = {
+  great: 'var(--sage)',
+  good: 'var(--ink)',
+  stretch: 'var(--amber-tone)',
+  hard_fail: 'var(--danger)',
 }
 
 export function TierBadge({ tier, className }: Props): React.ReactElement {
   const label = t(`match.tier.${tier}`)
+  const fg = TIER_FG[tier]
   return (
     <span
       role="status"
       aria-label={t('match.tier_aria', { tier: label })}
       className={cn(
-        'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold',
-        TIER_CLASS[tier],
+        'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold',
         className,
       )}
+      style={{
+        background: 'rgba(255,255,255,0.94)',
+        color: fg,
+        boxShadow: 'inset 0 0 0 1px var(--muteLine)',
+      }}
     >
+      <span
+        aria-hidden="true"
+        className="inline-block size-1.5 rounded-full"
+        style={{ background: fg }}
+      />
       {label}
     </span>
   )

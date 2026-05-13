@@ -64,23 +64,21 @@ export function FavoriteNote({
 
   const remaining = NOTE_MAX_LENGTH - draft.length
 
+  const counterColor =
+    remaining < 0 ? 'var(--danger)' : remaining < 50 ? 'var(--amber-tone)' : 'var(--mute)'
+
   return (
     <section className={cn('flex flex-col gap-1', className)} aria-labelledby={`${inputId}-label`}>
       <div className="flex items-baseline justify-between gap-2">
         <label
           id={`${inputId}-label`}
           htmlFor={inputId}
-          className="text-sm font-medium text-stone-900"
+          className="text-sm font-medium"
+          style={{ color: 'var(--ink)' }}
         >
           {t('note.label')}
         </label>
-        <span
-          className={cn(
-            'text-xs tabular-nums',
-            remaining < 0 ? 'text-rose-700' : remaining < 50 ? 'text-amber-700' : 'text-stone-500',
-          )}
-          aria-live="polite"
-        >
+        <span className="text-xs tabular-nums" style={{ color: counterColor }} aria-live="polite">
           {saved
             ? t('note.saved')
             : t('note.counter', { used: draft.length, max: NOTE_MAX_LENGTH })}
@@ -99,9 +97,16 @@ export function FavoriteNote({
         placeholder={t('note.placeholder', { name: petName })}
         rows={3}
         maxLength={NOTE_MAX_LENGTH}
-        className="w-full resize-none rounded-2xl border border-stone-200 bg-white px-3 py-2 text-sm text-stone-900 placeholder:text-stone-400 focus:border-amber-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+        className="w-full resize-none rounded-2xl px-3 py-2 text-sm placeholder:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--primary)]"
+        style={{
+          background: 'var(--surface)',
+          color: 'var(--ink)',
+          boxShadow: 'inset 0 0 0 1px var(--muteLine)',
+        }}
       />
-      <p className="text-xs text-stone-500">{t('note.footer')}</p>
+      <p className="text-xs" style={{ color: 'var(--mute)' }}>
+        {t('note.footer')}
+      </p>
     </section>
   )
 }

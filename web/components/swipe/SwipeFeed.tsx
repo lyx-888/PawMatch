@@ -8,10 +8,11 @@ import { ProgressiveQuestionCard } from '@/components/onboarding/ProgressiveQues
 import { track } from '@/lib/analytics'
 import { t } from '@/lib/i18n'
 import { getExcludeIds, useFavorites } from '@/lib/local-state'
-import { useShouldShowOnboardingPrompt } from '@/lib/onboarding/state'
+import { useShouldShowOnboardingOnFirstVisit } from '@/lib/onboarding/state'
 import type { Pet } from '@/types/pet'
 
 const PAGE_SIZE = 30
+const SWIPE_FIVE_COMPLETE = 5
 
 export function SwipeFeed(): React.ReactElement {
   const [pets, setPets] = useState<Pet[] | null>(null)
@@ -23,7 +24,7 @@ export function SwipeFeed(): React.ReactElement {
   // hook reads localStorage which the form updates async). Local override
   // keeps the close instantaneous.
   const [onboardingClosed, setOnboardingClosed] = useState(false)
-  const shouldShowOnboarding = useShouldShowOnboardingPrompt(swipesThisSession) && !onboardingClosed
+  const shouldShowOnboarding = useShouldShowOnboardingOnFirstVisit() && !onboardingClosed
   // Progressive triggers on the swipe feed look at the favorites count
   // (first / third favorite). Pet-detail-specific triggers like the cat
   // mesh question live on the pet detail page where the species context is.
@@ -51,9 +52,21 @@ export function SwipeFeed(): React.ReactElement {
     load()
   }, [load])
 
+  // Upfront quiz takes the whole swipe-stack area. The form is the user's
+  // first interaction so it must visually own the surface — rendering the
+  // SwipeStack alongside (or behind) it would invite stray swipes before the
+  // user has even read the prompt.
+  if (shouldShowOnboarding) {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col items-stretch justify-center">
+        <OnboardingFlow open={true} onClose={() => setOnboardingClosed(true)} />
+      </div>
+    )
+  }
+
   if (error) {
     return (
-      <div className="rounded-2xl bg-rose-50 p-4 text-sm text-rose-900">
+      <div className="min-h-0 flex-1 rounded-2xl bg-rose-50 p-4 text-sm text-rose-900">
         {t('swipe.load_error', { reason: error })}
       </div>
     )
@@ -64,12 +77,8 @@ export function SwipeFeed(): React.ReactElement {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <OnboardingFlow open={shouldShowOnboarding} onClose={() => setOnboardingClosed(true)} />
-      {/* Hide while the onboarding prompt is occupying the same slot —
-          stacking two amber cards would be visual noise and only the
-          first-favorite trigger would be eligible anyway. */}
-      {!shouldShowOnboarding && <ProgressiveQuestionCard context={{ favoritesCount }} />}
+    <div className="flex min-h-0 flex-1 flex-col gap-4">
+      <ProgressiveQuestionCard context={{ favoritesCount }} />
       <SwipeStack
         pets={pets}
         onDecision={(decision, pet) => {
@@ -80,7 +89,7 @@ export function SwipeFeed(): React.ReactElement {
           track('pet_viewed', { pet_id: pet.id, source: pet.source })
           const nextCount = swipesThisSession + 1
           setSwipesThisSession(nextCount)
-          if (nextCount === 5 && !fiveCompleteFired) {
+          if (nextCount === SWIPE_FIVE_COMPLETE && !fiveCompleteFired) {
             track('swipe_5_complete')
             setFiveCompleteFired(true)
           }
@@ -97,7 +106,7 @@ export function SwipeFeed(): React.ReactElement {
 function SkeletonCard(): React.ReactElement {
   return (
     <div
-      className="aspect-[3/4] w-full animate-pulse rounded-3xl bg-stone-100"
+      className="min-h-0 w-full flex-1 animate-pulse rounded-3xl bg-stone-100"
       aria-hidden="true"
     />
   )

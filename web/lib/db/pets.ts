@@ -16,6 +16,36 @@ export type PetFilters = {
 export const DEFAULT_LIMIT = 20
 export const MAX_LIMIT = 100
 
+// Used by the desktop RightRail. Most recent N pets by first_seen_at.
+export async function getRecentlyArrivedPets(limit: number): Promise<Pet[]> {
+  const client = createServerClient()
+  const { data, error } = await client
+    .from('pets')
+    .select('*')
+    .in('status', ['available', 'pending'])
+    .order('first_seen_at', { ascending: false })
+    .limit(limit)
+  if (error) throw new Error(`getRecentlyArrivedPets: ${error.message}`)
+  return ((data ?? []) as PetRow[]).map(mapRowToPet)
+}
+
+// Used by the desktop RightRail. Pets that have been listed >= 90 days
+// ago and are still on the available/pending shelf — surfacing them is
+// the "Still waiting" emotional core of the product.
+export async function getLongTimerPets(limit: number): Promise<Pet[]> {
+  const client = createServerClient()
+  const cutoff = new Date(Date.now() - 90 * 86_400_000).toISOString()
+  const { data, error } = await client
+    .from('pets')
+    .select('*')
+    .in('status', ['available', 'pending'])
+    .lt('first_seen_at', cutoff)
+    .order('first_seen_at', { ascending: true })
+    .limit(limit)
+  if (error) throw new Error(`getLongTimerPets: ${error.message}`)
+  return ((data ?? []) as PetRow[]).map(mapRowToPet)
+}
+
 export async function getPetById(id: string): Promise<Pet | null> {
   const client = createServerClient()
   const { data, error } = await client.from('pets').select('*').eq('id', id).maybeSingle()
@@ -35,7 +65,17 @@ export async function listPets(
     .order('id', { ascending: false })
     .limit(filters.limit + 1) // fetch one extra to compute nextCursor
 
-  if (filters.species) query = query.eq('species', filters.species)
+  if (filters.species) {
+    if (filters.species === 'other') {
+      // "Others" = everything that isn't one of the three named species.
+      // Matches the user's mental model ("other than dog/cat/rabbit") and
+      // future-proofs against scrapers that write literal non-standard
+      // values like 'hamster' or 'bird' instead of the umbrella 'other'.
+      query = query.not('species', 'in', '(dog,cat,rabbit)')
+    } else {
+      query = query.eq('species', filters.species)
+    }
+  }
   if (filters.size) query = query.eq('size', filters.size)
   if (filters.source) query = query.eq('source', filters.source)
   if (typeof filters.hdbApproved === 'boolean')

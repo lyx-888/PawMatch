@@ -38,13 +38,13 @@
 - [ ] Profiles can be partial; `completion_pct` auto-computed.
 - **Acceptance:** authenticated user can read/update own profile; cannot read another user's profile.
 
-### 2.4 Three-question onboarding
+### 2.4 Three-question onboarding (upfront with skip)
 
-- [ ] After 5 swipes, show soft inline prompt.
+- [ ] On first visit (no profile in localStorage / server), show the 3-question quiz as a modal over the swipe surface, before swipe gestures are enabled.
 - [ ] Three questions: housing, kids, other pets.
-- [ ] On submit: save to localStorage (anon) or server (account).
-- [ ] Match scores activate immediately.
-- **Acceptance:** prompt appears at swipe #5, dismissable, completes in < 60 seconds.
+- [ ] On submit: save to localStorage (anon) or server (account); modal closes; match tiers active from pet #1.
+- [ ] Skip option records dismissal in localStorage; swipe stack works without tiers until user opts back in from a "Complete profile" entry in the nav.
+- **Acceptance:** quiz modal appears on first visit and blocks swipe until completed or skipped; skipping does not re-block in subsequent sessions; completes in < 60 seconds.
 
 ### 2.5 Progressive profiling
 

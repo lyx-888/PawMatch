@@ -7,6 +7,7 @@ import {
   useReducedMotion,
   useTransform,
 } from 'framer-motion'
+import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { SwipeCard } from './SwipeCard'
@@ -86,16 +87,28 @@ export function SwipeStack({ pets, onDecision, onEmpty }: Props): React.ReactEle
 
   if (!current) {
     return (
-      <div className="flex h-full w-full flex-col items-center justify-center gap-3 rounded-3xl border-2 border-dashed border-stone-200 bg-white p-8 text-center">
-        <p className="text-lg font-semibold text-stone-900">{t('swipe.empty_title')}</p>
-        <p className="text-sm text-stone-600">{t('swipe.empty_body')}</p>
+      <div
+        className="flex min-h-0 w-full flex-1 flex-col items-center justify-center gap-3 rounded-[22px] p-8 text-center"
+        style={{
+          background: 'var(--surface)',
+          boxShadow: 'inset 0 0 0 1px var(--muteLine)',
+          color: 'var(--ink)',
+        }}
+      >
+        <p className="display text-lg">{t('swipe.empty_title')}</p>
+        <p className="text-sm" style={{ color: 'var(--mute)' }}>
+          {t('swipe.empty_body')}
+        </p>
       </div>
     )
   }
 
+  // Card uses flex-1 (not aspect-[3/4]) so it fills the available viewport
+  // height. The home page locks scroll, so without this the card would
+  // either get clipped or force a scroll on short phones.
   return (
-    <div className="flex flex-col gap-4">
-      <div className="relative aspect-[3/4] w-full">
+    <div className="flex min-h-0 flex-1 flex-col gap-5">
+      <div className="relative min-h-0 w-full flex-1">
         <AnimatePresence>
           <SwipeCardLayer
             key={current.id}
@@ -108,7 +121,7 @@ export function SwipeStack({ pets, onDecision, onEmpty }: Props): React.ReactEle
       </div>
 
       <div
-        className="flex items-center justify-center gap-6"
+        className="flex shrink-0 items-center justify-center gap-3.5"
         role="group"
         aria-label={t('swipe.actions_label')}
       >
@@ -118,13 +131,22 @@ export function SwipeStack({ pets, onDecision, onEmpty }: Props): React.ReactEle
           ariaLabel={t('swipe.pass_aria', { name: current.name })}
         />
         <ActionButton
+          intent="info"
+          href={`/pets/${current.id}`}
+          ariaLabel={t('pet_card.more_about', { name: current.name })}
+        />
+        <ActionButton
           intent="favorite"
           onClick={() => apply('favorite')}
           disabled={capReached}
           ariaLabel={t('swipe.favorite_aria', { name: current.name })}
         />
       </div>
-      {capReached && <p className="text-center text-sm text-amber-700">{t('swipe.cap_warning')}</p>}
+      {capReached && (
+        <p className="shrink-0 text-center text-sm" style={{ color: 'var(--primary)' }}>
+          {t('swipe.cap_warning')}
+        </p>
+      )}
     </div>
   )
 }
@@ -176,31 +198,107 @@ function SwipeCardLayer({
   )
 }
 
+type Intent = Decision | 'info'
+
+type ActionButtonProps = {
+  intent: Intent
+  ariaLabel: string
+  onClick?: () => void
+  href?: string
+  disabled?: boolean
+}
+
+// Three-button row matching the prototype: pass (52px white), info (48px
+// white, links to detail), favorite (56px clay primary with shadow). All
+// use the same hit-target component for consistent press feedback.
 function ActionButton({
   intent,
   onClick,
+  href,
   disabled,
   ariaLabel,
-}: {
-  intent: Decision
-  onClick: () => void
-  disabled?: boolean
-  ariaLabel: string
-}): React.ReactElement {
-  const isPass = intent === 'pass'
+}: ActionButtonProps): React.ReactElement {
+  const size = intent === 'pass' ? 52 : intent === 'info' ? 48 : 56
+  const isFavorite = intent === 'favorite'
+  const style: React.CSSProperties = {
+    width: size,
+    height: size,
+    background: isFavorite ? 'var(--primary)' : 'var(--surface)',
+    color: isFavorite ? '#fff' : intent === 'pass' ? 'var(--mute)' : 'var(--ink)',
+    boxShadow: isFavorite
+      ? '0 10px 20px rgba(181,101,74,0.30)'
+      : '0 4px 14px rgba(30,24,16,0.10), inset 0 0 0 1px rgba(30,24,16,0.06)',
+  }
+  const sharedClass = cn(
+    'inline-flex items-center justify-center rounded-full transition-transform duration-100 active:scale-[0.94] disabled:opacity-50',
+    'focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--primary)] focus-visible:ring-offset-2',
+  )
+  const icon = intent === 'pass' ? <PassIcon /> : intent === 'info' ? <InfoIcon /> : <HeartIcon />
+
+  if (intent === 'info' && href) {
+    return (
+      <Link href={href} aria-label={ariaLabel} className={sharedClass} style={style}>
+        {icon}
+      </Link>
+    )
+  }
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
       aria-label={ariaLabel}
-      className={cn(
-        'flex h-14 w-14 items-center justify-center rounded-full bg-white text-2xl shadow-md ring-1 ring-stone-200 transition active:scale-95 disabled:opacity-50',
-        'focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500',
-        isPass ? 'text-stone-700 hover:bg-stone-100' : 'text-rose-600 hover:bg-rose-50',
-      )}
+      className={sharedClass}
+      style={style}
     >
-      {isPass ? '✕' : '♥'}
+      {icon}
     </button>
+  )
+}
+
+function PassIcon(): React.ReactElement {
+  return (
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <line x1="6" y1="6" x2="18" y2="18" />
+      <line x1="18" y1="6" x2="6" y2="18" />
+    </svg>
+  )
+}
+
+function InfoIcon(): React.ReactElement {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="16" x2="12" y2="12" />
+      <circle cx="12" cy="8" r="0.5" fill="currentColor" />
+    </svg>
+  )
+}
+
+function HeartIcon(): React.ReactElement {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 21s-7.5-4.6-9.6-9.1C1 8.9 2.7 5.7 5.7 5.2c2-.3 3.9.7 4.8 2.4l1.5 2.4 1.5-2.4c.9-1.7 2.8-2.7 4.8-2.4 3 .5 4.7 3.7 3.3 6.7C19.5 16.4 12 21 12 21z" />
+    </svg>
   )
 }

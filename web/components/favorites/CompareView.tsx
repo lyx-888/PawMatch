@@ -115,7 +115,15 @@ export function CompareView({ pets }: Props): React.ReactElement {
           role="table"
           aria-label={t('compare.table_aria')}
         >
-          <div className="sticky left-0 bg-stone-50" role="rowheader" aria-hidden="true" />
+          <div
+            className="sticky left-0 z-10"
+            role="rowheader"
+            aria-hidden="true"
+            style={{
+              background: 'var(--bg)',
+              boxShadow: '4px 0 6px -4px rgba(30,24,16,0.10)',
+            }}
+          />
           {pets.map((pet) => (
             <PetColumnHeader key={pet.id} pet={pet} />
           ))}
@@ -134,7 +142,12 @@ function CompareRow({ row, pets }: { row: Row; pets: Pet[] }): React.ReactElemen
     <>
       <div
         role="rowheader"
-        className="sticky left-0 flex items-center bg-stone-50 pr-2 text-xs font-medium tracking-wide text-stone-500 uppercase"
+        className="sticky left-0 z-10 flex items-center pr-2 text-xs font-medium tracking-wide uppercase"
+        style={{
+          background: 'var(--bg)',
+          color: 'var(--mute)',
+          boxShadow: '4px 0 6px -4px rgba(30,24,16,0.10)',
+        }}
       >
         {row.label}
       </div>

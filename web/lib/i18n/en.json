@@ -5,8 +5,45 @@
   },
   "nav": {
     "primary_label": "Primary",
+    "browse": "Browse",
     "search": "Search",
-    "favorites": "Favorites"
+    "watches": "Watches",
+    "saved": "Saved",
+    "favorites": "Favorites",
+    "profile": "Profile"
+  },
+  "side_nav": {
+    "your_home": "Your home",
+    "your_home_hint": "Add your housing so we can flag pets that fit your home.",
+    "edit": "Edit"
+  },
+  "pet_sheet": {
+    "reasoning_title": "How {name} fits your home",
+    "save_secondary": "Save to shortlist · notify on status",
+    "saved_secondary": "Saved · we'll notify on status",
+    "source_caveat": "Listing details come straight from {source}. Verify on their site before visiting.",
+    "modal_label": "Pet detail",
+    "close": "Close",
+    "handle_aria": "Drag down to close"
+  },
+  "rail": {
+    "label": "More from the shelters",
+    "recently_arrived": "Recently arrived",
+    "recently_meta": "past 14d",
+    "still_waiting": "Still waiting",
+    "still_waiting_meta": "90+ days",
+    "still_waiting_intro": "These ones have been at the shelter longest. They're not new — that's why they need you.",
+    "days_waiting": "waiting {days}d",
+    "sources_label": "Sources",
+    "sources_body": "Listings synced regularly from SOSD, SPCA Singapore, OSCAS, Cat Welfare Society and partner shelters. Adoption is handled by each shelter directly."
+  },
+  "profile": {
+    "title": "Profile",
+    "placeholder": "Profile management is coming. For now, complete the onboarding questions to set your home details."
+  },
+  "watches": {
+    "title": "Watches",
+    "placeholder": "Saved searches and shelter alerts are coming. For now, browse the swipe feed for new arrivals."
   },
   "header": {
     "pets_looking_one": "{count} pet looking for a home across {shelters} {shelterWord}",
@@ -133,10 +170,10 @@
     "complete_profile_prompt": "Complete the three onboarding questions to get a real match score."
   },
   "onboarding": {
-    "prompt_heading": "Want smarter matches?",
-    "prompt_body": "Tell us about your home in 60 seconds — we'll surface pets that suit your space.",
+    "prompt_heading": "Tell us about your home",
+    "prompt_body": "60 seconds — we'll only show pets that fit your space. Skip if you'd rather browse first.",
     "prompt_start": "Get started",
-    "prompt_dismiss": "Not now",
+    "prompt_dismiss": "Skip for now",
     "form_heading": "Three quick questions",
     "form_intro": "These power your match score. You can change them anytime.",
     "form_close_aria": "Close onboarding",

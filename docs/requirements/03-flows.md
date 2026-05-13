@@ -6,10 +6,10 @@
 
 ### 3.1 First-time anonymous user (Browse & Go)
 
-1. Lands on `/` → sees live counter, adoption stories carousel, swipe stack.
-2. Swipes through pets, no account required.
-3. After 5 swipes, soft prompt for the 3-question profile.
-4. Match scores activate; continues swiping with smarter ranking.
+1. Lands on `/` → 3-question quiz modal opens over the swipe stack.
+2. Completes the quiz (or taps Skip) — modal closes, swipe stack becomes interactive.
+3. If completed, match tier tags appear from pet #1; if skipped, pets sorted by recency × longevity (no tiers, dismissal remembered).
+4. Swipes through pets, no account required.
 5. Favorites a pet → soft prompt to create account so favorites persist across devices.
 6. Taps pet → detail view → "View on SPCA" → leaves to shelter site (handoff event logged).
 7. 3 days later: in-app or email check-in: *"Did you reach out?"*

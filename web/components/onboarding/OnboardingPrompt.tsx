@@ -18,27 +18,41 @@ export function OnboardingPrompt({ onStart, onDismiss, className }: Props): Reac
     <div
       role="region"
       aria-labelledby="onboarding-prompt-heading"
-      className={cn(
-        'rounded-2xl border border-amber-200 bg-amber-50 p-4 text-stone-900 shadow-sm',
-        className,
-      )}
+      className={cn('rounded-2xl p-4', className)}
+      style={{
+        background: 'var(--primarySoft)',
+        boxShadow: 'inset 0 0 0 1px var(--primary)',
+        color: 'var(--ink)',
+      }}
     >
-      <h2 id="onboarding-prompt-heading" className="text-sm font-semibold">
+      <h2
+        id="onboarding-prompt-heading"
+        className="display text-sm"
+        style={{ color: 'var(--ink)' }}
+      >
         {t('onboarding.prompt_heading')}
       </h2>
-      <p className="mt-1 text-sm text-stone-700">{t('onboarding.prompt_body')}</p>
+      <p className="mt-1 text-sm" style={{ color: 'var(--ink)' }}>
+        {t('onboarding.prompt_body')}
+      </p>
       <div className="mt-3 flex items-center gap-2">
         <button
           type="button"
           onClick={onStart}
-          className="rounded-full bg-amber-600 px-4 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700"
+          className="rounded-full px-4 py-1.5 text-sm font-semibold transition"
+          style={{
+            background: 'var(--primary)',
+            color: '#fff',
+            boxShadow: '0 6px 14px rgba(181,101,74,0.30)',
+          }}
         >
           {t('onboarding.prompt_start')}
         </button>
         <button
           type="button"
           onClick={onDismiss}
-          className="rounded-full px-3 py-1.5 text-sm font-medium text-stone-600 transition hover:text-stone-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-400"
+          className="rounded-full px-3 py-1.5 text-sm font-medium transition"
+          style={{ color: 'var(--mute)' }}
         >
           {t('onboarding.prompt_dismiss')}
         </button>

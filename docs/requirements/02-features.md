@@ -99,20 +99,20 @@ available → pending → adopted → gone
 - Duplicates within 5% Hamming distance flagged for admin review.
 - Never auto-merge — surface to admin only.
 
-### 2.2 Onboarding (progressive)
+### 2.2 Onboarding (upfront with skip)
 
-**Step 1 — Land directly on the swipe stack.** Anonymous, no signup, no quiz. Pets sorted by recency × longevity.
+**Step 1 — Quiz on first visit.** On first landing (anonymous or authenticated, with no profile in localStorage / server), the user is prompted with the 3-question quiz as a modal over the swipe surface, before swipe gestures are enabled. The modal can be completed *or* explicitly skipped — both paths unlock the swipe stack.
 
-**Step 2 — After 5 swipes**, soft inline prompt: *"Want smarter matches? Tell us about your home in 60 seconds."* Dismissable.
-
-**Step 3 — Three essential questions:**
+**Step 2 — Three essential questions:**
 - Housing type — HDB / Condo / Landed / Other.
 - Kids in household — Yes / No.
 - Other pets in household — None / Cats / Dogs / Both.
 
-These three power the hardest constraints and are sufficient to activate match scoring.
+These three power the hardest constraints and activate match scoring. Match tier tags (Great / Good / Stretch / Not eligible) appear on every pet card from session start once these are answered.
 
-**Step 4 — Progressive profiling.** Remaining lifestyle data asked contextually:
+**Step 3 — Skip path.** If the user dismisses the quiz, the dismissal is recorded so the modal does not re-block in subsequent sessions. The swipe stack works without match tiers — pets are sorted by recency × longevity (the original "browse and go" experience). A "Complete your profile" entry stays visible in the nav so the user can opt back in any time.
+
+**Step 4 — Progressive profiling.** Remaining lifestyle data continues to be asked contextually after the essentials are answered (or after a user opts back in via the profile screen):
 
 | Trigger | Question |
 |---|---|
@@ -131,7 +131,7 @@ Each is one tap to answer or dismiss. Profile completion percentage tracked.
 - Enabling notifications.
 - Following a shelter.
 
-Account never blocks the swipe.
+Account never blocks the swipe. The quiz blocks the swipe only on the very first visit, and is always skippable.
 
 #### 2.2.1 Anonymous → registered migration
 

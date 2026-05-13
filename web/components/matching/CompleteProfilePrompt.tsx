@@ -13,10 +13,12 @@ type Props = {
 export function CompleteProfilePrompt({ className }: Props): React.ReactElement {
   return (
     <p
-      className={cn(
-        'rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900',
-        className,
-      )}
+      className={cn('rounded-2xl px-3 py-2 text-xs', className)}
+      style={{
+        background: 'var(--amber-soft)',
+        color: 'var(--amber-tone)',
+        boxShadow: 'inset 0 0 0 1px var(--amber-tone)',
+      }}
     >
       {t('match.complete_profile_prompt')}
     </p>

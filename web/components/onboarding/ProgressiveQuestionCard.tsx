@@ -52,13 +52,19 @@ function Card({ question, className }: CardProps): React.ReactElement {
     <div
       role="region"
       aria-labelledby={`progressive-${question.id}`}
-      className={cn(
-        'rounded-2xl border border-amber-200 bg-amber-50 p-4 text-stone-900 shadow-sm',
-        className,
-      )}
+      className={cn('rounded-2xl p-4', className)}
+      style={{
+        background: 'var(--primarySoft)',
+        boxShadow: 'inset 0 0 0 1px var(--primary)',
+        color: 'var(--ink)',
+      }}
     >
       <div className="flex items-start justify-between gap-3">
-        <p id={`progressive-${question.id}`} className="text-sm font-semibold">
+        <p
+          id={`progressive-${question.id}`}
+          className="text-sm font-semibold"
+          style={{ color: 'var(--ink)' }}
+        >
           {t(question.promptKey)}
         </p>
         <button
@@ -68,7 +74,8 @@ function Card({ question, className }: CardProps): React.ReactElement {
             track('progressive_question_dismissed', { question_id: question.id })
           }}
           aria-label={t('onboarding.progressive.dismiss_aria')}
-          className="-mt-1 -mr-1 rounded-full p-1 text-stone-500 transition hover:bg-stone-100 hover:text-stone-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-400"
+          className="-mt-1 -mr-1 rounded-full p-1 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+          style={{ color: 'var(--mute)' }}
         >
           <span aria-hidden="true" className="text-lg leading-none">
             ×
@@ -92,7 +99,12 @@ function Card({ question, className }: CardProps): React.ReactElement {
                 value: String(opt.value),
               })
             }}
-            className="rounded-full bg-amber-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition hover:bg-amber-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700"
+            className="rounded-full px-3 py-1.5 text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--primary)]"
+            style={{
+              background: 'var(--primary)',
+              color: '#fff',
+              boxShadow: '0 6px 14px rgba(181,101,74,0.25)',
+            }}
           >
             {t(opt.labelKey)}
           </button>
